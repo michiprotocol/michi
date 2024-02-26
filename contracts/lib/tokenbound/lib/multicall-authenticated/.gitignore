@@ -1,0 +1,16 @@
+examples
+out
+cache
+broadcast
+node_modules
+target
+output
+venv
+
+.vscode
+
+# Ignore environment variables incase someone accidentally sets and commits
+.env
+.env.prod
+
+old.gas-snapshot
