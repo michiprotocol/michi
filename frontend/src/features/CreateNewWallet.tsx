@@ -18,7 +18,7 @@ export default function CreateNewWallet({
 
     setTimeout(() => {
       setIsButtonLoading(false);
-      addWallet(wallet)
+      addWallet(wallet as Wallet)
       closeModal();
     }, 2000);
   }

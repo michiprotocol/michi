@@ -6,6 +6,12 @@ import path from "path";
 export default defineConfig({
   build: {
     target: "es2020",
+    rollupOptions: {
+      external: [
+        "@safe-globalThis/safe-apps-provider",
+        "@safe-globalThis/safe-apps-sdk",
+      ]
+    }
   },
   optimizeDeps: {
     esbuildOptions: {
