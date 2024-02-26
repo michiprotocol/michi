@@ -1,21 +1,39 @@
-import { ConnectKitButton } from 'connectkit'
-import { useAccount } from 'wagmi'
+import { Routes } from "@/constants/routes";
+import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
+import MyWallets from "@/pages/MyWallets";
+import Trade from "@/pages/Trade";
+import NavBar from "@/widgets/NavBar";
 
+export default function App() {
 
-export function App() {
-  const { isConnected, address } = useAccount()
+  const router = createBrowserRouter([
+    {
+      element: (
+        <Layout />
+      ),
+      children: [
+        {
+          path: Routes.MY_WALLETS,
+          element: <MyWallets />,
+        },
+        {
+          path: Routes.TRADE,
+          element: <Trade />
+        },
+      ]
+    }
+  ]);
 
   return (
-    <>
-      <h1>Michi</h1>
-      <ConnectKitButton theme="midnight" />
-      {address && (
-        <div
-          className="text-xl text-red-500"
-        >
-          {address}
-        </div>
-      )}
-    </>
+    <RouterProvider router={router} />
+  )
+}
+
+function Layout() {
+  return (
+    <div className="min-h-screen w-full bg-background text-info overflow-x-hidden">
+      <NavBar />
+      <Outlet />
+    </div>
   )
 }
