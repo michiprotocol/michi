@@ -11,13 +11,7 @@ export function App() {
       <ConnectKitButton theme="midnight" />
       {address && (
         <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            margin: '32px 0 0',
-            maxWidth: '320px',
-          }}
+          className="text-xl text-red-500"
         >
           {address}
         </div>

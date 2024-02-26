@@ -1,4 +1,5 @@
 import { ConnectKitProvider } from "connectkit";
+import "./global.css";
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import { WagmiProvider } from "wagmi";
