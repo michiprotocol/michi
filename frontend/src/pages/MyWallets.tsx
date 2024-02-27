@@ -1,3 +1,4 @@
+import useTokenboundClient from "@/app/hooks/useTokenboundClient";
 import { abi, michiBackpackAddress } from "@/constants/contracts/MichiBackpack";
 import { BackpackCreatedLog } from "@/constants/types/BackpackCreatedLog";
 import { Wallet } from "@/constants/types/wallet";
@@ -11,6 +12,13 @@ import { useAccount, useReadContract, useWatchContractEvent } from 'wagmi';
 export default function MyWallets() {
   const [wallets, setWallets] = useState<Wallet[]>([])
   const account = useAccount()
+  const { tokenboundClient } = useTokenboundClient()
+
+  const tokenboundAccount = tokenboundClient.getAccount({
+    tokenContract: michiBackpackAddress,
+    tokenId: '10',
+  })
+  console.log("🚀 ~ MyWallets ~ tokenboundAccount:", tokenboundAccount)
 
   const result = useReadContract({
     abi,
@@ -19,7 +27,6 @@ export default function MyWallets() {
     address: michiBackpackAddress,
     functionName: "owner"
   })
-  console.log("🚀 ~ MyWallets ~ result:", result.data)
 
   useWatchContractEvent({
     config: wagmiConfig,
