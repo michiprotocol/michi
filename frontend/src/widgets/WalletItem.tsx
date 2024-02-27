@@ -26,29 +26,29 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
 
   const hasTokens = useMemo(() => {
     return tokens.length > 0;
-  }, [tokens])
+  }, [tokens.length])
 
-  useEffect(() => {
-    const fetchTokenBalances = async () => {
-      try {
-        axios.post('http://localhost:3000/token-balances', {
-          tokenboundAccount,
-          chain: defaultChain.id
-        }).then(({ data }: { data: Token[] }) => {
-          // fetch points data here
+  // useEffect(() => {
+  //   const fetchTokenBalances = async () => {
+  //     try {
+  //       axios.post('http://localhost:3000/token-balances', {
+  //         tokenboundAccount,
+  //         chain: defaultChain.id
+  //       }).then(({ data }: { data: Token[] }) => {
+  //         // fetch points data here
 
-          setTokens(data)
-        });
+  //         setTokens(data)
+  //       });
 
-      } catch (e) {
-        console.error(e);
-      }
-    }
+  //     } catch (e) {
+  //       console.error(e);
+  //     }
+  //   }
 
-    if (tokenboundAccount) {
-      fetchTokenBalances();
-    }
-  }, [tokenboundAccount])
+  //   if (tokenboundAccount) {
+  //     fetchTokenBalances();
+  //   }
+  // }, [tokenboundAccount])
 
   return (
     <WalletWrapper address={tokenboundAccount} name="MichiBackpack" index={index}>

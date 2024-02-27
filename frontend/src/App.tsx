@@ -3,6 +3,7 @@ import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
 import MyWallets from "@/pages/MyWallets";
 import Trade from "@/pages/Trade";
 import NavBar from "@/widgets/NavBar";
+import { Toaster } from "./shared/ui/toaster";
 
 export default function App() {
 
@@ -34,6 +35,7 @@ function Layout() {
     <div className="min-h-screen w-full bg-background text-info overflow-x-hidden">
       <NavBar />
       <Outlet />
+      <Toaster />
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { BackpackCreatedLog } from "@/constants/types/BackpackCreatedLog";
 import { Wallet } from "@/constants/types/wallet";
 import { defaultChain, wagmiConfig } from "@/wagmi";
 import { useState } from "react";
+import { useToast } from "@/shared/ui/use-toast"
 import { useAccount, useWatchContractEvent, useWriteContract } from 'wagmi'
 
 export default function CreateNewWallet({
@@ -10,6 +11,7 @@ export default function CreateNewWallet({
 }: {
   addWallet: (wallet: Wallet) => void
 }) {
+  const { toast } = useToast()
   const { writeContractAsync } = useWriteContract()
   const account = useAccount();
 
@@ -29,6 +31,10 @@ export default function CreateNewWallet({
           tokenId: "10" // replace with a real TokenId
         }
       );
+      toast({
+        title: "New Wallet Created 🎉",
+        description: `Wallet address: ${wallet.backpack}`,
+      })
       closeModal();
       setIsButtonLoading(false);
     },
@@ -64,7 +70,7 @@ export default function CreateNewWallet({
           </p>
           <button className="btn" onClick={createNewWallet}>
             {isButtonLoading && <span className="loading loading-spinner" />}
-            Create New Wallet
+            {isButtonLoading ? "Creating a" : "Create"} New Wallet
           </button>
         </div>
         <form method="dialog" className="modal-backdrop">
