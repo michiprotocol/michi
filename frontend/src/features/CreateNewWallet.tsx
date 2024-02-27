@@ -1,26 +1,41 @@
+import { abi, michiBackpackAddress } from "@/constants/contracts/MichiBackpack";
 import { Wallet } from "@/constants/types/wallet";
+import { defaultChain } from "@/wagmi";
 import { useState } from "react";
+import { useAccount, useWriteContract } from 'wagmi'
 
 export default function CreateNewWallet({
   addWallet
 }: {
   addWallet: (wallet: Wallet) => void
 }) {
+  const { writeContractAsync } = useWriteContract()
+  const account = useAccount();
+
   const [isButtonLoading, setIsButtonLoading] = useState(false);
 
-  const createNewWallet = () => {
+  const createNewWallet = async () => {
     setIsButtonLoading(true);
 
     // request to create a new wallet
+    const result = await writeContractAsync({
+      account: account.address,
+      abi,
+      chainId: defaultChain.id,
+      address: michiBackpackAddress,
+      functionName: 'createBackpack',
+      args: [
+        1,
+      ],
+    })
+    console.log("🚀 ~ createNewWal ~ result:", result)
 
     // new wallet object response
-    const wallet = {}
+    // const wallet = {}
 
-    setTimeout(() => {
-      setIsButtonLoading(false);
-      addWallet(wallet as Wallet)
-      closeModal();
-    }, 2000);
+    setIsButtonLoading(false);
+    // addWallet(wallet as Wallet)
+    closeModal();
   }
 
 

@@ -2,9 +2,11 @@ import {
   getDefaultConfig
 } from "connectkit";
 import { createConfig } from "wagmi";
-import { arbitrum } from 'wagmi/chains';
+import { arbitrum, sepolia } from 'wagmi/chains';
 
-const chains = [arbitrum]
+export const defaultChain = sepolia;
+
+const chains = [defaultChain]
 
 export const wagmiConfig = createConfig(
   getDefaultConfig({
