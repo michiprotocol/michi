@@ -31,35 +31,22 @@ export default function MyWallets() {
     if (account.address && wallets.length < 1) {
       fetchUserNFTs();
     }
-  })
+  }, [wallets, account.address])
 
-  const result = useReadContract({
+  const approvedTokens = useReadContract({
     abi,
     config: wagmiConfig,
     chainId: defaultChain.id,
     address: michiBackpackAddress,
-    functionName: "owner"
+    functionName: "listApprovedTokens"
   })
-
-  useWatchContractEvent({
-    config: wagmiConfig,
-    chainId: defaultChain.id,
-    address: michiBackpackAddress,
-    eventName: 'BackpackCreated',
-    abi,
-    onLogs(logs) {
-      setWallets([
-        ...wallets,
-        ...(logs.map(log => ({
-          backpack: ((log as unknown as BackpackCreatedLog).args?.backpack as Address),
-          tokenId: '10',
-        })))
-      ]);
-    },
-  })
+  console.log("🚀 ~ MyWallets ~ approvedTokens:", approvedTokens.data)
 
   const addWallet = (wallet: Wallet) => {
-    setWallets([...wallets, wallet])
+    if (wallet.backpack !== wallets[wallets.length - 1].backpack) {
+      setWallets([...wallets, wallet])
+      console.log("Wallet added", wallet.backpack);
+    }
   }
 
   if (!account.isConnected) {

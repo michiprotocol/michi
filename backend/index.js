@@ -40,6 +40,21 @@ app.post("/user-nfts", async (req, res) => {
   }
 });
 
+app.post("/token-balances", async (req, res) => {
+  const { tokenboundAccount, chain } = req.body;
+  try {
+    const data = await Moralis.EvmApi.token.getWalletTokenBalances({
+      chain: chain,
+      address: tokenboundAccount,
+    });
+
+    res.status(200);
+    res.json(data.result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
 // Add this a startServer function that initialises Moralis
 const startServer = async () => {
   await Moralis.start({

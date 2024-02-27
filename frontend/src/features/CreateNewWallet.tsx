@@ -1,8 +1,9 @@
 import { abi, michiBackpackAddress } from "@/constants/contracts/MichiBackpack";
+import { BackpackCreatedLog } from "@/constants/types/BackpackCreatedLog";
 import { Wallet } from "@/constants/types/wallet";
-import { defaultChain } from "@/wagmi";
+import { defaultChain, wagmiConfig } from "@/wagmi";
 import { useState } from "react";
-import { useAccount, useWriteContract } from 'wagmi'
+import { useAccount, useWatchContractEvent, useWriteContract } from 'wagmi'
 
 export default function CreateNewWallet({
   addWallet
@@ -14,11 +15,30 @@ export default function CreateNewWallet({
 
   const [isButtonLoading, setIsButtonLoading] = useState(false);
 
+  useWatchContractEvent({
+    config: wagmiConfig,
+    chainId: defaultChain.id,
+    address: michiBackpackAddress,
+    eventName: 'BackpackCreated',
+    abi,
+    onLogs(logs) {
+      const wallet = (logs[0] as unknown as BackpackCreatedLog).args;
+      addWallet(
+        {
+          backpack: wallet.backpack,
+          tokenId: "10" // replace with a real TokenId
+        }
+      );
+      closeModal();
+      setIsButtonLoading(false);
+    },
+  })
+
   const createNewWallet = async () => {
     setIsButtonLoading(true);
 
     // request to create a new wallet
-    const result = await writeContractAsync({
+    await writeContractAsync({
       account: account.address,
       abi,
       chainId: defaultChain.id,
@@ -28,14 +48,6 @@ export default function CreateNewWallet({
         1,
       ],
     })
-    console.log("🚀 ~ createNewWal ~ result:", result)
-
-    // new wallet object response
-    // const wallet = {}
-
-    setIsButtonLoading(false);
-    // addWallet(wallet as Wallet)
-    closeModal();
   }
 
 
