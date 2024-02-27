@@ -21,4 +21,35 @@ module.exports = {
     },
   },
   plugins: [require("daisyui")],
+  daisyui: {
+    themes: [
+      {
+        mytheme: {
+          primary: "#F7BA1E",
+          ".btn-primary": {
+            color: "#2D2D37",
+          },
+          ".btn": {
+            border: "none",
+            fontWeight: 700,
+          },
+
+          secondary: "#f6d860",
+          accent: "#37cdbe",
+          neutral: "#3d4451",
+          "base-100": "#ffffff",
+
+          "--rounded-box": "1rem",
+          "--rounded-btn": "16px",
+          "--rounded-badge": "1.9rem",
+          "—-animation-btn": "0.25s",
+          "—-animation-input": "0.2s",
+          "—-btn-focus-scale": "0.95",
+          "--border-btn": "1px",
+          "--tab-border": "1px",
+          "—-tab-radius": "0.5rem",
+        },
+      },
+    ],
+  },
 };
