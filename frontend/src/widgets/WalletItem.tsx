@@ -28,6 +28,14 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
     return tokens.length > 0;
   }, [tokens.length])
 
+  /*
+    TYLER-TODO:
+
+   Uncoment the useEffect below and before setting up tokens with setTokens inside .then()
+   make a request to your scraper to get the data about points
+   You can look at Token interface to see what data it requires
+  */
+
   // useEffect(() => {
   //   const fetchTokenBalances = async () => {
   //     try {

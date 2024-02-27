@@ -1,13 +1,11 @@
-import { abi, michiBackpackAddress } from "@/constants/contracts/MichiBackpack";
-import { BackpackCreatedLog } from "@/constants/types/BackpackCreatedLog";
+import { abi, michiBackpackAddress, michiBackpackOriginAddress } from "@/constants/contracts/MichiBackpack";
 import { Wallet } from "@/constants/types/wallet";
 import CreateNewWallet from "@/features/CreateNewWallet";
 import { defaultChain, wagmiConfig } from "@/wagmi";
 import WalletItem from "@/widgets/WalletItem";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Address } from "viem";
-import { useAccount, useReadContract, useWatchContractEvent } from 'wagmi';
+import { useAccount, useReadContract } from 'wagmi';
 
 export default function MyWallets() {
   const [wallets, setWallets] = useState<Wallet[]>([])
@@ -20,7 +18,9 @@ export default function MyWallets() {
           address: account.address,
           chain: defaultChain.id
         }).then(({ data }: { data: Wallet[] }) => {
-          setWallets(data)
+          const wallets = data.filter(wallet => wallet.tokenAddress === michiBackpackOriginAddress.toLowerCase());
+          console.log("🚀 ~ fetchUserNFTs ~ wallet:", wallets)
+          setWallets(wallets)
         });
 
       } catch (e) {
@@ -38,14 +38,16 @@ export default function MyWallets() {
     config: wagmiConfig,
     chainId: defaultChain.id,
     address: michiBackpackAddress,
-    functionName: "listApprovedTokens"
+    functionName: "listApprovedTokens",
+    args: [1]
   })
   console.log("🚀 ~ MyWallets ~ approvedTokens:", approvedTokens.data)
 
   const addWallet = (wallet: Wallet) => {
-    if (wallet.backpack !== wallets[wallets.length - 1].backpack) {
-      setWallets([...wallets, wallet])
-      console.log("Wallet added", wallet.backpack);
+    if (wallet.tokenId !== wallets[wallets.length - 1].tokenId) {
+      const newWallets = ([...wallets, wallet])
+      setWallets(newWallets)
+      return newWallets.length - 1;
     }
   }
 
