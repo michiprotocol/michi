@@ -42,6 +42,7 @@ app.post("/user-nfts", async (req, res) => {
 
 app.post("/token-balances", async (req, res) => {
   const { tokenboundAccount, chain } = req.body;
+  console.log("🚀 ~ app.post ~ tokenboundAccount:", tokenboundAccount);
   try {
     const data = await Moralis.EvmApi.token.getWalletTokenBalances({
       chain: chain,
@@ -49,7 +50,21 @@ app.post("/token-balances", async (req, res) => {
     });
 
     res.status(200);
-    res.json(data.result);
+    res.json(data.jsonResponse);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+app.post("/get-metadata", async (req, res) => {
+  const { chain, addresses } = req.body;
+  try {
+    const response = await Moralis.EvmApi.token.getTokenMetadata({
+      chain: chain,
+      addresses: addresses,
+    });
+
+    console.log(response.raw);
   } catch (e) {
     console.error(e);
   }

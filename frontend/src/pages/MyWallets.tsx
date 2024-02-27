@@ -1,11 +1,11 @@
-import { abi, michiBackpackAddress, michiBackpackOriginAddress } from "@/constants/contracts/MichiBackpack";
+import { michiBackpackOriginAddress } from "@/constants/contracts/MichiBackpack";
 import { Wallet } from "@/constants/types/wallet";
 import CreateNewWallet from "@/features/CreateNewWallet";
-import { defaultChain, wagmiConfig } from "@/wagmi";
+import { defaultChain } from "@/wagmi";
 import WalletItem from "@/widgets/WalletItem";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useAccount, useReadContract } from 'wagmi';
+import { useAccount } from 'wagmi';
 
 export default function MyWallets() {
   const [wallets, setWallets] = useState<Wallet[]>([])
@@ -32,16 +32,6 @@ export default function MyWallets() {
       fetchUserNFTs();
     }
   }, [wallets, account.address])
-
-  const approvedTokens = useReadContract({
-    abi,
-    config: wagmiConfig,
-    chainId: defaultChain.id,
-    address: michiBackpackAddress,
-    functionName: "listApprovedTokens",
-    args: [1]
-  })
-  console.log("🚀 ~ MyWallets ~ approvedTokens:", approvedTokens.data)
 
   const addWallet = (wallet: Wallet) => {
     if (wallet.tokenId !== wallets[wallets.length - 1].tokenId) {

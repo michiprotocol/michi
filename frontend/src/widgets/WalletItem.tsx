@@ -1,62 +1,79 @@
 import useTokenboundClient from "@/app/hooks/useTokenboundClient";
-import { michiBackpackAddress } from "@/constants/contracts/MichiBackpack";
-import { Token } from "@/constants/types/token";
+import { abi, michiBackpackAddress } from "@/constants/contracts/MichiBackpack";
+import { DepositedToken, Token } from "@/constants/types/token";
 import { Wallet } from "@/constants/types/wallet";
 import TokensTable from "@/shared/TokensTable";
 import WalletWrapper from "@/shared/WalletWrapper";
-import { defaultChain } from "@/wagmi";
+import { defaultChain, wagmiConfig } from "@/wagmi";
 import axios from "axios";
 import classNames from "classnames";
 import { useEffect, useMemo, useState } from "react";
+import { Address } from "viem";
+import { useAccount, useReadContract } from 'wagmi';
 
 export default function WalletItem({ wallet, index }: { wallet: Wallet, index: number }) {
   const { tokenboundClient } = useTokenboundClient()
-  const [tokens, setTokens] = useState<Token[]>([{
-    address: "0x34234",
-    symbol: "YT-eETH 26 June 2024",
-    amount: 28.636,
-    elPoints: 1583.5,
-    protocolPoints: 31934.21
-  }])
+  const account = useAccount()
+  const [tokens, setTokens] = useState<Token[]>([])
+  const [depositedTokens, setDepositedTokens] = useState<DepositedToken[]>([])
 
   const tokenboundAccount = tokenboundClient.getAccount({
     tokenContract: michiBackpackAddress,
     tokenId: wallet.tokenId,
   })
 
-  const hasTokens = useMemo(() => {
+  const canDeposit = useMemo(() => {
     return tokens.length > 0;
   }, [tokens.length])
 
-  /*
-    TYLER-TODO:
+  const canWithdraw = useMemo(() => {
+    return depositedTokens.length > 0;
+  }, [depositedTokens.length])
 
-   Uncoment the useEffect below and before setting up tokens with setTokens inside .then()
-   make a request to your scraper to get the data about points
-   You can look at Token interface to see what data it requires
-  */
+  const approvedTokens: { data: Token["token_address"][] | undefined } = useReadContract({
+    abi,
+    config: wagmiConfig,
+    chainId: defaultChain.id,
+    address: michiBackpackAddress,
+    functionName: "getApprovedTokens",
+  })
 
-  // useEffect(() => {
-  //   const fetchTokenBalances = async () => {
-  //     try {
-  //       axios.post('http://localhost:3000/token-balances', {
-  //         tokenboundAccount,
-  //         chain: defaultChain.id
-  //       }).then(({ data }: { data: Token[] }) => {
-  //         // fetch points data here
+  useEffect(() => {
+    const fetchTokenBalances = async (acc: Address, isDeposited?: boolean) => {
+      try {
+        axios.post('http://localhost:3000/token-balances', {
+          tokenboundAccount: acc,
+          chain: defaultChain.id
+        }).then(({ data }: { data: Token[] }) => {
+          console.log("🚀 ~ fetchTokenBalances ~ data:", data)
+          const newPoints = data.filter(token => {
+            return approvedTokens.data!.some(approvedToken => approvedToken.toLowerCase() === token.token_address);
+          });
 
-  //         setTokens(data)
-  //       });
+          if (isDeposited) {
+            // TYLER-TODO:
+            // make a request to your scraper to get the data about points
+            // You can look at Token interface to see what data it requires
+            setDepositedTokens(newPoints as DepositedToken[])
+          } else {
+            setTokens(newPoints)
+          }
+        });
 
-  //     } catch (e) {
-  //       console.error(e);
-  //     }
-  //   }
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
-  //   if (tokenboundAccount) {
-  //     fetchTokenBalances();
-  //   }
-  // }, [tokenboundAccount])
+    if (approvedTokens.data) {
+      if (account.address) {
+        fetchTokenBalances(account.address);
+      }
+      if (tokenboundAccount) {
+        fetchTokenBalances(tokenboundAccount);
+      }
+    }
+  }, [tokenboundAccount, approvedTokens.data])
 
   return (
     <WalletWrapper address={tokenboundAccount} name="MichiBackpack" index={index}>
@@ -64,19 +81,24 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
         <div className={classNames(
           "flex flex-row justify-center text-secondary w-full rounded-lg p-3",
           {
-            "bg-placeholder-background": !hasTokens,
-            "bg-transparent": hasTokens,
+            "bg-placeholder-background": !canDeposit,
+            "bg-transparent": canDeposit,
           }
         )}>
-          {hasTokens ? (
-            <TokensTable tokens={tokens} />
+          {canWithdraw ? (
+            <TokensTable tokens={depositedTokens} />
+          ) : canDeposit ? (
+            // <TokensTable tokens={tokens} />
+            <div>
+              Deposit here
+            </div>
           ) : (
             <span className="text-center">No assets deposited.</span>
           )}
         </div>
         <div className="flex flex-row justify-center gap-5 mt-1">
           <button className="btn btn-md">Deposit</button>
-          {hasTokens && (<button className="btn btn-md">Withdraw</button>)}
+          {canWithdraw && (<button className="btn btn-md">Withdraw</button>)}
         </div>
       </>
     </WalletWrapper>

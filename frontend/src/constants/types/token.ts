@@ -1,9 +1,12 @@
 import { Address } from "viem";
 
 export interface Token {
-  address: Address;
+  token_address: Address;
   symbol: string;
-  amount: number;
+  balance: number;
+}
+
+export interface DepositedToken extends Token {
   elPoints: number;
   protocolPoints: number;
 }

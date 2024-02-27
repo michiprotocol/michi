@@ -1,9 +1,9 @@
-import { Token } from "@/constants/types/token"
+import { DepositedToken } from "@/constants/types/token";
 
 export default function TokensTable({
   tokens
 }: {
-  tokens: Token[]
+    tokens: DepositedToken[]
 }) {
 
   return (
@@ -22,7 +22,7 @@ export default function TokensTable({
             tokens.map((token, index) => {
               const {
                 symbol: name,
-                amount,
+                balance: amount,
                 elPoints,
                 protocolPoints
               } = token;
