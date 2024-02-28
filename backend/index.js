@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000; // Heroku sets process.env.PORT
 
 app.use(express.json());
-app.use(cors({ origin: ["*"] }));
+app.use(cors({ origin: ["http://localhost:5173"] }));
 
 const MORALIS_API_KEY = process.env.MORALIS_API_KEY;
 
