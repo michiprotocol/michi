@@ -1,5 +1,6 @@
 import { abi, michiBackpackHelperAddress } from "@/constants/contracts/MichiBackpack"
 import { tokenABIs } from "@/constants/contracts/tokenABIs"
+import { DepositEventLog } from "@/constants/types/DepositEventLog"
 import { DepositedToken, Token } from "@/constants/types/token"
 import { cn } from "@/lib/utils"
 import {
@@ -81,8 +82,10 @@ export default function WalletView({
     chainId: defaultChain.id,
     address: michiBackpackHelperAddress,
     abi,
+    eventName: "Deposit",
     onLogs(logs) {
-      console.log("🚀 ~ onLogs ~ logs deposit:", logs)
+      const depositResponse = (logs[0] as unknown as DepositEventLog).args;
+      console.log("🚀 ~ onLogs ~ depositResponse:", depositResponse)
       toast({
         title: "Log 🎉",
         description: `Log occured`,
@@ -127,8 +130,9 @@ export default function WalletView({
     }
     if (isProcessing && approvedToDeposit) {
       runDeposit();
+    } else {
+      refetchSelectedTokenAllowance();
     }
-    refetchSelectedTokenAllowance();
   }, [selectedToken, isProcessing, selectedTokenAllowance])
 
   const handleWithdraw = (token: DepositedToken) => {
