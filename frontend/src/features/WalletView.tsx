@@ -17,7 +17,7 @@ import { WalletView as WalletViewType } from "@/widgets/WalletItem"
 import { BigNumberish } from "ethers"
 import { defaultAbiCoder, formatEther } from "ethers/lib/utils"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Address, encodeFunctionData } from "viem"
+import { Address, encodeFunctionData, getAddress } from "viem"
 import { useAccount, useReadContract, useWatchContractEvent, useWriteContract } from "wagmi"
 
 export default function WalletView(
@@ -140,30 +140,13 @@ export default function WalletView(
   }, [selectedToken, isProcessing, selectedTokenAllowance])
 
   const handleWithdraw = async (token: DepositedToken) => {
-    console.log("🚀 ~ handleWithdraw ~ address:", account.address)
     setIsProcessing(true);
-  // const res = await tokenboundClient.transferERC20({
-  //   account: tokenboundAccount,
-  //   amount: +input,
-  //   recipientAddress: account.address!,
-  //   erc20tokenAddress: token.token_address,
-  //   erc20tokenDecimals: token.decimals,
-  // })
-
-    const encodedFunctionData = encodeFunctionData({
-      abi: tokenABI!,
-      functionName: "transfer",
-      args: [
-        account.address,
-        +input * (10 ** 18)
-      ]
-    })
-    console.log("🚀 ~ handleWithdraw ~ encodedFunctionData:", encodedFunctionData)
-    const res = await tokenboundClient.execute({
+    const res = await tokenboundClient.transferERC20({
       account: tokenboundAccount,
-      to: token.token_address,
-      value: BigInt(0),
-      data: encodedFunctionData
+      amount: +input,
+      recipientAddress: getAddress(account.address!),
+      erc20tokenAddress: token.token_address,
+      erc20tokenDecimals: token.decimals,
     })
     setIsProcessing(false);
     console.log("🚀 ~ handleWithdraw ~ res:", res)
