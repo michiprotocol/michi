@@ -4,6 +4,7 @@ export interface Token {
   token_address: Address;
   symbol: string;
   balance: number;
+  decimals: number;
 }
 
 export interface DepositedToken extends Token {

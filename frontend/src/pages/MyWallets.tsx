@@ -30,7 +30,7 @@ export default function MyWallets() {
     if (account.address && wallets.length < 1) {
       fetchUserNFTs();
     }
-  }, [wallets, account.address])
+  }, [account.address])
 
   const addWallet = (wallet: Wallet) => {
     if (wallet.tokenId !== wallets[wallets.length - 1].tokenId) {

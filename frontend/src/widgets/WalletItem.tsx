@@ -61,6 +61,7 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
     tokenContract: michiBackpackOriginAddress,
     tokenId: wallet.tokenId,
   })
+  console.log("🚀 ~ WalletItem ~ tokenboundAccount:", tokenboundAccount)
 
   const canWithdraw = useMemo(() => {
     return depositedTokens.length > 0;
@@ -89,6 +90,7 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
           const newPoints = data.filter(token => {
             return approvedTokens.data!.some(approvedToken => approvedToken.toLowerCase() === token.token_address);
           });
+          console.log("🚀 ~ newPoints ~ newPoints:", newPoints)
 
           if (isDeposited) {
             // Keep disabled until deployed to Mainnet

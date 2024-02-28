@@ -1,3 +1,4 @@
+import useTokenboundClient from "@/app/hooks/useTokenboundClient"
 import { abi, michiBackpackHelperAddress } from "@/constants/contracts/MichiBackpack"
 import { tokenABIs } from "@/constants/contracts/tokenABIs"
 import { DepositEventLog } from "@/constants/types/DepositEventLog"
@@ -14,9 +15,9 @@ import { useToast } from "@/shared/ui/use-toast"
 import { defaultChain, wagmiConfig } from "@/wagmi"
 import { WalletView as WalletViewType } from "@/widgets/WalletItem"
 import { BigNumberish } from "ethers"
-import { formatEther } from "ethers/lib/utils"
+import { defaultAbiCoder, formatEther } from "ethers/lib/utils"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Address } from "viem"
+import { Address, encodeFunctionData } from "viem"
 import { useAccount, useReadContract, useWatchContractEvent, useWriteContract } from "wagmi"
 
 export default function WalletView(
@@ -43,6 +44,7 @@ export default function WalletView(
   const closeWalletView = useCallback(() => setView(WalletViewType.NONE), [setView])
   const account = useAccount();
   const { toast } = useToast();
+  const { tokenboundClient } = useTokenboundClient();
   const { writeContractAsync } = useWriteContract()
 
   const [input, setInput] = useState<string>("");
@@ -98,7 +100,6 @@ export default function WalletView(
   })
 
   const handleDeposit = async (token: Token) => {
-    if (!input) return;
     setIsProcessing(true);
     if (!approvedToDeposit) {
       await writeContractAsync({
@@ -138,8 +139,34 @@ export default function WalletView(
     }
   }, [selectedToken, isProcessing, selectedTokenAllowance])
 
-  const handleWithdraw = (token: DepositedToken) => {
+  const handleWithdraw = async (token: DepositedToken) => {
+    console.log("🚀 ~ handleWithdraw ~ address:", account.address)
+    setIsProcessing(true);
+  // const res = await tokenboundClient.transferERC20({
+  //   account: tokenboundAccount,
+  //   amount: +input,
+  //   recipientAddress: account.address!,
+  //   erc20tokenAddress: token.token_address,
+  //   erc20tokenDecimals: token.decimals,
+  // })
 
+    const encodedFunctionData = encodeFunctionData({
+      abi: tokenABI!,
+      functionName: "transfer",
+      args: [
+        account.address,
+        +input * (10 ** 18)
+      ]
+    })
+    console.log("🚀 ~ handleWithdraw ~ encodedFunctionData:", encodedFunctionData)
+    const res = await tokenboundClient.execute({
+      account: tokenboundAccount,
+      to: token.token_address,
+      value: BigInt(0),
+      data: encodedFunctionData
+    })
+    setIsProcessing(false);
+    console.log("🚀 ~ handleWithdraw ~ res:", res)
   }
 
   const closeModal = () => {
@@ -209,7 +236,7 @@ export default function WalletView(
           }
           )}
           onClick={() => {
-            if (!selectedToken) return;
+            if (!selectedToken || !input) return;
             if (isDepositView) {
               handleDeposit(selectedToken as Token)
             } else {
