@@ -9,6 +9,7 @@
     "clean": "rm -rf node_modules"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-toast": "^1.1.5",
     "@tanstack/react-query": "^5.24.1",
     "@tokenbound/sdk": "workspace:^",
