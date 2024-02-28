@@ -10,10 +10,19 @@ import classNames from "classnames";
 import { useEffect, useMemo, useState } from "react";
 import { Address } from "viem";
 import { useAccount, useReadContract } from 'wagmi';
+import WalletViewComponent from "@/features/WalletView";
+import { cn } from "@/lib/utils";
+
+export enum WalletView {
+  DEPOSIT,
+  WITHDRAW,
+  NONE,
+}
 
 export default function WalletItem({ wallet, index }: { wallet: Wallet, index: number }) {
   const { tokenboundClient } = useTokenboundClient()
   const account = useAccount()
+  const [view, setView] = useState<WalletView>(WalletView.NONE)
   const [tokens, setTokens] = useState<Token[]>([])
   const [depositedTokens, setDepositedTokens] = useState<DepositedToken[]>([])
 
@@ -78,29 +87,40 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
   return (
     <WalletWrapper address={tokenboundAccount} name="MichiBackpack" index={index}>
       <>
-        <div className={classNames(
-          "flex flex-row justify-center text-secondary w-full rounded-lg p-3",
-          {
-            "bg-placeholder-background": !canDeposit,
-            "bg-transparent": canDeposit,
-          }
-        )}>
+        <div className={
+          cn(
+            "flex flex-row justify-center bg-transparent text-secondary w-full rounded-lg",
+            { "p-3": view === WalletView.NONE }
+          )}
+        >
           {canWithdraw ? (
             <TokensTable tokens={depositedTokens} />
-          ) : canDeposit ? (
-            // <TokensTable tokens={tokens} />
-            <div>
-              Deposit here
-            </div>
-          ) : (
+          ) : view === WalletView.NONE ? (
             <span className="text-center">No assets deposited.</span>
-          )}
+          ) : (
+            <WalletViewComponent view={view} setView={setView} tokens={tokens} depositedTokens={depositedTokens} setDepositedTokens={setDepositedTokens} />
+          )
+          }
         </div>
-        <div className="flex flex-row justify-center gap-5 mt-1">
-          <button className="btn btn-md">Deposit</button>
-          {canWithdraw && (<button className="btn btn-md">Withdraw</button>)}
-        </div>
+        {WalletView.NONE === view && (
+          <div className="flex flex-row justify-center gap-5 mt-1">
+            <button
+              className="btn btn-md"
+              onClick={() => setView(WalletView.DEPOSIT)}
+            >
+              Deposit
+            </button>
+            {canWithdraw && (
+              <button
+                className="btn btn-md"
+                onClick={() => setView(WalletView.WITHDRAW)}
+              >
+                Withdraw
+              </button>
+            )}
+          </div>
+        )}
       </>
-    </WalletWrapper>
+    </WalletWrapper >
   )
 }
