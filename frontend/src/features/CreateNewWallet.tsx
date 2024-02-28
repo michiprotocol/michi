@@ -1,4 +1,4 @@
-import { abi, michiBackpackAddress } from "@/constants/contracts/MichiBackpack";
+import { abi, michiBackpackHelperAddress } from "@/constants/contracts/MichiBackpack";
 import { BackpackCreatedLog } from "@/constants/types/BackpackCreatedLog";
 import { Wallet } from "@/constants/types/wallet";
 import { defaultChain, wagmiConfig } from "@/wagmi";
@@ -20,7 +20,7 @@ export default function CreateNewWallet({
   useWatchContractEvent({
     config: wagmiConfig,
     chainId: defaultChain.id,
-    address: michiBackpackAddress,
+    address: michiBackpackHelperAddress,
     eventName: 'BackpackCreated',
     abi,
     onLogs(logs) {
@@ -48,7 +48,7 @@ export default function CreateNewWallet({
       account: account.address,
       abi,
       chainId: defaultChain.id,
-      address: michiBackpackAddress,
+      address: michiBackpackHelperAddress,
       functionName: 'createBackpack',
       args: [
         1,

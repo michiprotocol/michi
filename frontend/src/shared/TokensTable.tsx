@@ -1,4 +1,5 @@
 import { DepositedToken } from "@/constants/types/token";
+import { formatEther } from "ethers/lib/utils"
 
 export default function TokensTable({
   tokens
@@ -29,7 +30,7 @@ export default function TokensTable({
               return (
                 <tr key={index}>
                   <th>{name}</th>
-                  <td>{amount}</td>
+                  <td>{formatEther(amount)}</td>
                   <td>{elPoints}</td>
                   <td>{protocolPoints}</td>
                 </tr>

@@ -2,7 +2,7 @@ import { Address } from "viem";
 
 export const michiBackpackOriginAddress: Address = "0xb808da590A95F30374aFB0Cb3eB3e68B2b06b2Cd";
 
-export const michiBackpackAddress: Address =
+export const michiBackpackHelperAddress: Address =
   "0x5aCa18EF5B3e43FE9b276D25560fbd91eDB900C0";
 
 export const abi = [
