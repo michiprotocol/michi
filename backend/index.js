@@ -18,7 +18,6 @@ app.get("/", (req, res) => {
 });
 
 
-
 app.get('/getPoints', async (req, res) => {
     const { address } = req.query;
 
