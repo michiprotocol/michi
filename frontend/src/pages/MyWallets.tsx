@@ -19,7 +19,6 @@ export default function MyWallets() {
           chain: defaultChain.id
         }).then(({ data }: { data: Wallet[] }) => {
           const wallets = data.filter(wallet => wallet.tokenAddress === michiBackpackOriginAddress.toLowerCase());
-          console.log("🚀 ~ fetchUserNFTs ~ wallet:", wallets)
           setWallets(wallets)
         });
 

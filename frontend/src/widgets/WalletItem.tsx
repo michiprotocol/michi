@@ -86,7 +86,6 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
           tokenboundAccount: acc,
           chain: defaultChain.id
         }).then(({ data }: { data: Token[] }) => {
-          console.log("🚀 ~ fetchTokenBalances ~ data:", data)
           const newPoints = data.filter(token => {
             return approvedTokens.data!.some(approvedToken => approvedToken.toLowerCase() === token.token_address);
           });

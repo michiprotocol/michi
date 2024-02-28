@@ -67,8 +67,6 @@ export default function WalletView(
     () => selectedTokenAllowance && Number(formatEther(selectedTokenAllowance as BigNumberish)) >= Number(input),
     [selectedTokenAllowance, input]
   );
-  console.log("🚀 ~ approvedToDeposit:", approvedToDeposit)
-
 
   // token approval event listener
   useWatchContractEvent({
@@ -77,8 +75,8 @@ export default function WalletView(
     address: selectedToken?.token_address,
     eventName: "Approval",
     abi: tokenABI,
-    onLogs(logs) {
-      console.log("🚀 ~ onLogs ~ approval logs:", logs)
+    onLogs() {
+      refetchSelectedTokenAllowance();
     },
   })
 
@@ -90,10 +88,9 @@ export default function WalletView(
     eventName: "Deposit",
     onLogs(logs) {
       const depositResponse = (logs[0] as unknown as DepositEventLog).args;
-      console.log("🚀 ~ onLogs ~ depositResponse:", depositResponse)
       toast({
-        title: "Log 🎉",
-        description: `Log occured`,
+        title: "Deposited successfully! 🎉",
+        description: `${formatEther(depositResponse.amountAfterFees)} of ${selectedToken?.symbol} were deposited into your account`,
       })
       forceTokenDataUpdate();
       closeWalletView();
@@ -221,11 +218,12 @@ export default function WalletView(
           }}
         >
           {isProcessing &&
-            <>
-              <span className="loading loading-spinner" />
-            <span>Processing your</span>
-            </>
-          }{isDepositView ? "Deposit" : "Withdraw"}
+            <span className="loading loading-spinner" />
+          }{isDepositView ? (
+            isProcessing ? "Depositing your tokens" : "Deposit"
+          ) : (
+            isProcessing ? "Withdrawing your tokens" : "Withdraw"
+          )}
         </button>
         <button
           className="btn btn-ghost"
