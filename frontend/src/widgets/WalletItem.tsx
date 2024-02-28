@@ -41,13 +41,6 @@ async function fetchPoints(address: string): Promise<ApiResponse> {
   }
 }
 
-
-fetchPoints("0x0561e5b036DdcF2401c2B6b486f85451d75760A2")
-.then(data => console.log(data))
-.catch(error => console.error(error));
-
-
-
 export enum WalletView {
   DEPOSIT,
   WITHDRAW,
@@ -59,6 +52,8 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
   const { tokenboundClient } = useTokenboundClient()
   const account = useAccount()
   const [view, setView] = useState<WalletView>(WalletView.NONE)
+  const [isFetchingData, setIsFetchingData] = useState(true);
+  const [forceTokensUpdate, setForceTokensUpdate] = useState({});
   const [tokens, setTokens] = useState<Token[]>([])
   const [depositedTokens, setDepositedTokens] = useState<DepositedToken[]>([])
 
@@ -79,8 +74,13 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
     functionName: "getApprovedTokens",
   })
 
+  const forceTokenDataUpdate = () => {
+    setForceTokensUpdate({});
+  }
+
   useEffect(() => {
     const fetchTokenBalances = async (acc: Address, isDeposited?: boolean) => {
+      setIsFetchingData(true)
       try {
         axios.post('http://localhost:3000/token-balances', {
           tokenboundAccount: acc,
@@ -92,22 +92,21 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
           });
 
           if (isDeposited) {
-            // TYLER-TODO:
-            // make a request to your scraper to get the data about points
-            // You can look at Token interface to see what data it requires
-
-            fetchPoints("0x0561e5b036DdcF2401c2B6b486f85451d75760A2")
-              .then(data => console.log(data))
-              .catch(error => console.error(error));
+            // Keep disabled until deployed to Mainnet
             
+            // fetchPoints("0x0561e5b036DdcF2401c2B6b486f85451d75760A2")
+            //   .then(data => console.log(data))
+            //   .catch(error => console.error(error));
+
             setDepositedTokens(newPoints as DepositedToken[])
           } else {
             setTokens(newPoints)
           }
+          setIsFetchingData(false)
         });
-
       } catch (e) {
         console.error(e);
+        setIsFetchingData(false)
       }
     }
 
@@ -119,7 +118,7 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
         fetchTokenBalances(tokenboundAccount, true);
       }
     }
-  }, [tokenboundAccount, approvedTokens.data])
+  }, [tokenboundAccount, approvedTokens.data, forceTokensUpdate])
 
   return (
     <WalletWrapper address={tokenboundAccount} name="MichiBackpack" index={index}>
@@ -133,9 +132,18 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
           {view === WalletView.NONE ? (
             canWithdraw ?
               <TokensTable tokens={depositedTokens} /> :
-              <span className="text-center">No assets deposited.</span>
+              isFetchingData ? (
+                <span className="loading loading-spinner" />
+              ) : <span className="text-center">No assets deposited.</span>
           ) : (
-            <WalletViewComponent tokenboundAccount={tokenboundAccount} view={view} setView={setView} tokens={tokens} depositedTokens={depositedTokens} />
+              <WalletViewComponent
+                tokenboundAccount={tokenboundAccount}
+                view={view}
+                setView={setView}
+                tokens={tokens}
+                depositedTokens={depositedTokens}
+                forceTokenDataUpdate={forceTokenDataUpdate}
+              />
           )}
         </div>
         {WalletView.NONE === view && (

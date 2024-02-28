@@ -15,27 +15,32 @@ import { defaultChain, wagmiConfig } from "@/wagmi"
 import { WalletView as WalletViewType } from "@/widgets/WalletItem"
 import { BigNumberish } from "ethers"
 import { formatEther } from "ethers/lib/utils"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Address } from "viem"
 import { useAccount, useReadContract, useWatchContractEvent, useWriteContract } from "wagmi"
 
-export default function WalletView({
-  view,
-  setView,
-  tokens,
-  depositedTokens,
-  tokenboundAccount
-}: {
-  view: WalletViewType,
-  setView: (view: WalletViewType) => void,
-  tokens: Token[],
-  depositedTokens: DepositedToken[],
-    tokenboundAccount: Address
-}) {
+export default function WalletView(
+  {
+    view,
+    setView,
+    tokens,
+    depositedTokens,
+    tokenboundAccount,
+    forceTokenDataUpdate
+  }: {
+    view: WalletViewType,
+    setView: (view: WalletViewType) => void,
+    tokens: Token[],
+    depositedTokens: DepositedToken[],
+    tokenboundAccount: Address,
+    forceTokenDataUpdate: () => void;
+  }
+) {
   const [selectedToken, setSelectedToken] = useState<Token | DepositedToken | undefined>(undefined);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const isDepositView = useMemo(() => view === WalletViewType.DEPOSIT, [view]);
   const tokenABI = useMemo(() => selectedToken && tokenABIs[selectedToken.token_address], [selectedToken])
+  const closeWalletView = useCallback(() => setView(WalletViewType.NONE), [setView])
   const account = useAccount();
   const { toast } = useToast();
   const { writeContractAsync } = useWriteContract()
@@ -90,7 +95,8 @@ export default function WalletView({
         title: "Log 🎉",
         description: `Log occured`,
       })
-      closeModal();
+      forceTokenDataUpdate();
+      closeWalletView();
     },
   })
 
@@ -149,7 +155,7 @@ export default function WalletView({
         <div className="flex flex-row items-center gap-1">
           <Select
             onValueChange={(value) => {
-              setSelectedToken(tokens.find(token => token.token_address === value))
+              setSelectedToken((isDepositView ? tokens : depositedTokens).find(token => token.token_address === value))
               if (selectedToken?.token_address !== value) {
                 setInput('')
               }
@@ -161,7 +167,7 @@ export default function WalletView({
             </SelectTrigger>
             <SelectContent>
               {
-                tokens.map((token, index) => (
+                (isDepositView ? tokens : depositedTokens).map((token, index) => (
                   <SelectItem
                     key={index}
                     value={token.token_address}
@@ -217,13 +223,13 @@ export default function WalletView({
           {isProcessing &&
             <>
               <span className="loading loading-spinner" />
-              <span>Processing your </span>
+            <span>Processing your</span>
             </>
           }{isDepositView ? "Deposit" : "Withdraw"}
         </button>
         <button
           className="btn btn-ghost"
-          onClick={() => setView(WalletViewType.NONE)}
+          onClick={closeWalletView}
         >
           Cancel
         </button>
