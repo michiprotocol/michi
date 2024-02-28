@@ -12,6 +12,42 @@ import { useAccount, useReadContract } from 'wagmi';
 import WalletViewComponent from "@/features/WalletView";
 import { cn } from "@/lib/utils";
 
+interface PointData {
+  elPoints: number;
+  points: number;
+}
+
+interface ApiResponse {
+  address: string;
+  results: Array<{
+    platform: string;
+    data: PointData | { error: string; url: string };
+  }>;
+}
+
+async function fetchPoints(address: string): Promise<ApiResponse> {
+  try {
+    const response = await axios.get<ApiResponse>(`http://localhost:3000/getPoints?address=${address}`);
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error fetching points:', error.message);
+      throw new Error(error.message);
+    } else {
+      console.error('Unexpected error:', error);
+      throw new Error('An unexpected error occurred');
+    }
+  }
+}
+
+
+fetchPoints("0x0561e5b036DdcF2401c2B6b486f85451d75760A2")
+.then(data => console.log(data))
+.catch(error => console.error(error));
+
+
+
 export enum WalletView {
   DEPOSIT,
   WITHDRAW,
@@ -59,6 +95,11 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
             // TYLER-TODO:
             // make a request to your scraper to get the data about points
             // You can look at Token interface to see what data it requires
+
+            fetchPoints("0x0561e5b036DdcF2401c2B6b486f85451d75760A2")
+              .then(data => console.log(data))
+              .catch(error => console.error(error));
+            
             setDepositedTokens(newPoints as DepositedToken[])
           } else {
             setTokens(newPoints)

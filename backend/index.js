@@ -6,10 +6,10 @@ const Moralis = require("moralis").default;
 const { EvmChain } = require("@moralisweb3/common-evm-utils");
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Heroku sets process.env.PORT
 
 app.use(express.json());
-app.use(cors({ origin: ["http://localhost:5173"] }));
+app.use(cors({ origin: ["*"] }));
 
 const MORALIS_API_KEY = process.env.MORALIS_API_KEY;
 
