@@ -1,12 +1,11 @@
 import useTokenboundClient from "@/app/hooks/useTokenboundClient";
-import { abi, michiBackpackAddress } from "@/constants/contracts/MichiBackpack";
+import { abi, michiBackpackHelperAddress, michiBackpackOriginAddress } from "@/constants/contracts/MichiBackpack";
 import { DepositedToken, Token } from "@/constants/types/token";
 import { Wallet } from "@/constants/types/wallet";
 import TokensTable from "@/shared/TokensTable";
 import WalletWrapper from "@/shared/WalletWrapper";
 import { defaultChain, wagmiConfig } from "@/wagmi";
 import axios from "axios";
-import classNames from "classnames";
 import { useEffect, useMemo, useState } from "react";
 import { Address } from "viem";
 import { useAccount, useReadContract } from 'wagmi';
@@ -28,13 +27,9 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
   const [depositedTokens, setDepositedTokens] = useState<DepositedToken[]>([])
 
   const tokenboundAccount = tokenboundClient.getAccount({
-    tokenContract: michiBackpackAddress,
+    tokenContract: michiBackpackOriginAddress,
     tokenId: wallet.tokenId,
   })
-
-  const canDeposit = useMemo(() => {
-    return tokens.length > 0;
-  }, [tokens.length])
 
   const canWithdraw = useMemo(() => {
     return depositedTokens.length > 0;
@@ -44,7 +39,7 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
     abi,
     config: wagmiConfig,
     chainId: defaultChain.id,
-    address: michiBackpackAddress,
+    address: michiBackpackHelperAddress,
     functionName: "getApprovedTokens",
   })
 
@@ -80,7 +75,7 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
         fetchTokenBalances(account.address);
       }
       if (tokenboundAccount) {
-        fetchTokenBalances(tokenboundAccount);
+        fetchTokenBalances(tokenboundAccount, true);
       }
     }
   }, [tokenboundAccount, approvedTokens.data])
@@ -94,14 +89,13 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
             { "p-3": view === WalletView.NONE }
           )}
         >
-          {canWithdraw ? (
-            <TokensTable tokens={depositedTokens} />
-          ) : view === WalletView.NONE ? (
-            <span className="text-center">No assets deposited.</span>
+          {view === WalletView.NONE ? (
+            canWithdraw ?
+              <TokensTable tokens={depositedTokens} /> :
+              <span className="text-center">No assets deposited.</span>
           ) : (
-            <WalletViewComponent view={view} setView={setView} tokens={tokens} depositedTokens={depositedTokens} setDepositedTokens={setDepositedTokens} />
-          )
-          }
+            <WalletViewComponent tokenboundAccount={tokenboundAccount} view={view} setView={setView} tokens={tokens} depositedTokens={depositedTokens} />
+          )}
         </div>
         {WalletView.NONE === view && (
           <div className="flex flex-row justify-center gap-5 mt-1">
