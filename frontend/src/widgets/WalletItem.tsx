@@ -17,6 +17,7 @@ export enum WalletView {
   DEPOSIT,
   WITHDRAW,
   NONE,
+  // in case of adding any other views, have to edit logic of WalletView component
 }
 
 export default function WalletItem({ wallet, index }: { wallet: Wallet, index: number }) {

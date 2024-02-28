@@ -10,8 +10,8 @@ export default function WalletWrapper({ address, name, index, children }: {
 }) {
 
   return (
-    <div key={index} className="bg-dark rounded-md px-10 py-3 flex flex-col gap-3 text-info">
-      <div className="flex flex-row justify-between font-bold">
+    <div key={index} className="bg-dark rounded-md px-5 py-3 flex flex-col gap-3 text-info">
+      <div className="flex flex-row justify-between font-normal">
         <span>Wallet NFT #{index}</span>
         <div className="flex flex-row items-center gap-2">
           <span className="whitespace-nowrap">Linked Wallet:</span>

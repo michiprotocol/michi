@@ -17,6 +17,7 @@ module.exports = {
         "secondary-background": "#282828",
         "placeholder-background": "#425C6F",
         dark: "#2D2D37",
+        success: "#27d564",
       },
     },
   },
@@ -32,6 +33,9 @@ module.exports = {
           ".btn": {
             border: "none",
             fontWeight: 700,
+          },
+          ".btn-success": {
+            backgroundColor: "#27d564",
           },
 
           secondary: "#f6d860",
