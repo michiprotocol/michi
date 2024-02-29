@@ -18,12 +18,12 @@ export default function NavBar() {
         {isConnected && (
           <>
             <Link to={Routes.MY_WALLETS} className={classNames("text-md", {
-              "underline underline-offset-4 text-blue": currentRoute === Routes.MY_WALLETS
+              "underline underline-offset-4 text-green-300": currentRoute === Routes.MY_WALLETS
             })}>
               My Wallets
             </Link>
             <Link to={Routes.TRADE} className={classNames("text-md", {
-              "underline underline-offset-4 text-blue": currentRoute === Routes.TRADE
+              "underline underline-offset-4 text-green-300": currentRoute === Routes.TRADE
             })}>
               Trade
             </Link>

@@ -36,7 +36,7 @@ export default function MyWallets() {
     if (wallet.tokenId !== wallets[wallets.length - 1].tokenId) {
       const newWallets = ([...wallets, wallet])
       setWallets(newWallets)
-      return newWallets.length - 1;
+      return newWallets.length;
     }
   }
 
@@ -56,7 +56,7 @@ export default function MyWallets() {
         </div>
         <div className="flex flex-col gap-5">
           {wallets.map((wallet, index) => (
-            <WalletItem key={index} wallet={wallet} index={index} />
+            <WalletItem key={index} wallet={wallet} index={index + 1} />
           ))}
         </div>
       </div>

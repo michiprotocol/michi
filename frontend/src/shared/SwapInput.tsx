@@ -29,7 +29,7 @@ export default function SwapInput({
         <span className="absolute top-2">{label}</span>
         <input
           type="text"
-          className="absolute text-info text-2xl bg-transparent w-full h-full outline-none border-none"
+          className="relative text-info text-2xl bg-transparent w-full h-full outline-none border-none"
           placeholder={placeholder}
           value={value}
           onChange={(e) => setValue(e.target.value)}
