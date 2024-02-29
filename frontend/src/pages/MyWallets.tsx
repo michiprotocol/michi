@@ -45,6 +45,10 @@ export default function MyWallets() {
     }
   }
 
+  const removeWallet = (tokenId: Wallet["tokenId"]) => {
+    setWallets(wallets.filter(wallet => wallet.tokenId !== tokenId))
+  }
+
   if (!account.isConnected) {
     return null;
   }
@@ -67,7 +71,7 @@ export default function MyWallets() {
               ))
             ) :  */
             wallets.length > 0 ? wallets.map((wallet, index) => (
-              <WalletItem key={index} wallet={wallet} index={index + 1} />
+              <WalletItem removeWallet={removeWallet} key={index} wallet={wallet} index={index + 1} />
             )) : <div className="mx-auto text-xl">
               No wallets
             </div>

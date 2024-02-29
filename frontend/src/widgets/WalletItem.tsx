@@ -50,7 +50,7 @@ export enum WalletView {
   // in case of adding any other views, have to edit logic of WalletView component
 }
 
-export default function WalletItem({ wallet, index }: { wallet: Wallet, index: number }) {
+export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wallet, index: number, removeWallet: (tokenId: Wallet["tokenId"]) => void }) {
   const { tokenboundClient } = useTokenboundClient()
   const account = useAccount()
   const [view, setView] = useState<WalletView>(WalletView.NONE)
@@ -143,19 +143,19 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
               </div>
           ) : view === WalletView.TRANSFER ? (
             <TransferWallet
-              tokenboundAccount={tokenboundAccount}
               closeWalletView={closeWalletView}
               walletTokenId={wallet.tokenId}
+              removeWallet={() => removeWallet(wallet.tokenId)}
             />
           ) : (
-                <WalletViewComponent
-                  tokenboundAccount={tokenboundAccount}
-                  view={view}
-                  closeWalletView={closeWalletView}
-                  tokens={tokens}
-                  depositedTokens={depositedTokens}
-                  forceTokenDataUpdate={forceTokenDataUpdate}
-                />
+            <WalletViewComponent
+              tokenboundAccount={tokenboundAccount}
+              view={view}
+              closeWalletView={closeWalletView}
+              tokens={tokens}
+              depositedTokens={depositedTokens}
+              forceTokenDataUpdate={forceTokenDataUpdate}
+            />
           )}
         </div>
         {WalletView.NONE === view && (
@@ -178,7 +178,7 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
               className="btn btn-md"
               onClick={() => setView(WalletView.TRANSFER)}
             >
-              Transfer
+              Transfer wallet
             </button>
           </div>
         )}
