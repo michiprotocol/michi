@@ -63,7 +63,7 @@ export default function MyWallets() {
                 <div key={index} className="skeleton w-full h-36 opacity-80"></div>
               ))
             ) :  */
-            wallets.length > 10 ? wallets.map((wallet, index) => (
+            wallets.length > 0 ? wallets.map((wallet, index) => (
               <WalletItem key={index} wallet={wallet} index={index + 1} />
             )) : <div className="mx-auto text-xl">
               No wallets
