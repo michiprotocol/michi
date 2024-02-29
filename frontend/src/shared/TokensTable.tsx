@@ -8,7 +8,7 @@ export default function TokensTable({
 }) {
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto w-full">
       <table className="table text-info">
         <thead>
           <tr className="text-info">

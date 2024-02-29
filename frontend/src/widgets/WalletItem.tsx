@@ -94,7 +94,7 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
 
           if (isDeposited) {
             // Keep disabled until deployed to Mainnet
-            
+
             // fetchPoints("0x0561e5b036DdcF2401c2B6b486f85451d75760A2")
             //   .then(data => console.log(data))
             //   .catch(error => console.error(error));
@@ -126,16 +126,20 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
       <>
         <div className={
           cn(
-            "flex flex-row justify-center bg-transparent text-secondary w-full rounded-lg",
-            { "p-3": view === WalletView.NONE }
+            "flex bg-transparent text-secondary w-full rounded-lg",
           )}
         >
           {view === WalletView.NONE ? (
             canWithdraw ?
               <TokensTable tokens={depositedTokens} /> :
-              isFetchingData ? (
-                <span className="loading loading-spinner" />
-              ) : <span className="text-center">No assets deposited.</span>
+              <div className="mx-auto">
+                {isFetchingData ? (
+                  <span className="loading loading-spinner" />
+                ) : (
+                  <span className="text-center">No assets deposited.</span>
+                )
+                }
+              </div>
           ) : (
               <WalletViewComponent
                 tokenboundAccount={tokenboundAccount}

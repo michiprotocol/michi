@@ -19,6 +19,8 @@ import { defaultAbiCoder, formatEther } from "ethers/lib/utils"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Address, encodeFunctionData, getAddress } from "viem"
 import { useAccount, useReadContract, useWatchContractEvent, useWriteContract } from "wagmi"
+import SwapToken from "./SwapToken"
+import TokenSelect from "@/shared/TokenSelect"
 
 export default function WalletView(
   {
@@ -159,32 +161,14 @@ export default function WalletView(
   return (
     <div className="flex flex-col gap-5 text-info w-full">
       <div className="bg-transparent rounded-xl p-2">
-        <div className="flex flex-row items-center gap-1">
-          <Select
-            onValueChange={(value) => {
-              setSelectedToken((isDepositView ? tokens : depositedTokens).find(token => token.token_address === value))
-              if (selectedToken?.token_address !== value) {
-                setInput('')
-              }
-            }}
-            disabled={isProcessing}
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Select token" />
-            </SelectTrigger>
-            <SelectContent>
-              {
-                (isDepositView ? tokens : depositedTokens).map((token, index) => (
-                  <SelectItem
-                    key={index}
-                    value={token.token_address}
-                  >
-                    {token.symbol}
-                  </SelectItem>
-                ))
-              }
-            </SelectContent>
-          </Select>
+        <div className="flex flex-row items-center justify-center gap-5">
+          <TokenSelect
+            selectedToken={selectedToken}
+            setSelectedToken={setSelectedToken}
+            resetInput={() => setInput('')}
+            tokens={isDepositView ? tokens : depositedTokens}
+            isDisabled={isProcessing}
+          />
           <div className="flex flex-col relative">
             <input
               readOnly={isProcessing}
@@ -207,7 +191,7 @@ export default function WalletView(
           </div>
           <div className="flex flex-row gap-3">
             {maxAmount && <button className="text-info text-sm underline underline-offset-2" onClick={() => setInput(maxAmount?.toString())}>MAX</button>}
-            {selectedToken && isDepositView && <button className="btn btn-sm" onClick={() => (document.getElementById('buy_modal') as HTMLDialogElement).showModal()}>BUY</button>}
+            {selectedToken && isDepositView && <button className="btn btn-primary btn-sm" onClick={() => (document.getElementById('buy_modal') as HTMLDialogElement).showModal()}>BUY</button>}
           </div>
         </div>
       </div>
@@ -244,12 +228,17 @@ export default function WalletView(
       </div>
       <dialog id="buy_modal" className="modal">
         <div className="modal-box bg-background flex flex-col items-center gap-5">
-          <p className="text-lg">
-            Here you can buy more {selectedToken?.symbol}
-          </p>
+          <SwapToken
+            forceTokenDataUpdate={forceTokenDataUpdate}
+            closeModal={closeModal}
+            tokens={tokens as Token[]}
+            selectedToken={selectedToken as Token}
+            setSelectedToken={setSelectedToken}
+            tokenboundAccount={tokenboundAccount}
+          />
           <button
             onClick={() => closeModal()}
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            className="btn btn-sm btn-circle btn-ghost absolute right-[0.7px] top-[0.7px]"
           >
             ✕
           </button>

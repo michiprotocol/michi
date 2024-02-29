@@ -8,7 +8,7 @@ module.exports = {
         info: "#FAFAFA",
         secondary: "#A3A5D3",
         action: "#FF852C",
-        "gradient-button": "#222222",
+        label: "#5d5f61",
         blue: "#1790FF",
         gray: "#425C6F",
       },
