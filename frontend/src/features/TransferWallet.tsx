@@ -3,8 +3,8 @@ import { Wallet } from "@/constants/types/wallet";
 import { toast } from "@/shared/ui/use-toast";
 import { defaultChain, wagmiConfig } from "@/wagmi";
 import { useState } from "react";
-import { Address } from "viem"
-import { useAccount, useContractWrite, useWatchContractEvent } from "wagmi";
+import { Address } from "viem";
+import { useAccount, useWatchContractEvent, useWriteContract } from "wagmi";
 
 export default function TransferWaller({
   closeWalletView,
@@ -15,7 +15,7 @@ export default function TransferWaller({
   walletTokenId: Wallet["tokenId"];
   removeWallet: () => void
 }) {
-  const { writeContractAsync } = useContractWrite();
+  const { writeContractAsync } = useWriteContract()
   const { address } = useAccount();
   const [value, setValue] = useState<string>("");
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false)
@@ -34,20 +34,40 @@ export default function TransferWaller({
     },
   })
 
+  const closeModal = () => {
+    (document.getElementById('transfer-modal-close-btn') as HTMLDialogElement).click();
+  }
+
+  const sendInvalidAddressToast = () => {
+    toast({
+      title: "Error occured!",
+      description: 'Address is invalid',
+      variant: "destructive"
+    })
+  }
+
   const handleTransfer = async (transferTo: Address) => {
     setIsButtonLoading(true)
-    await writeContractAsync({
-      account: address,
-      abi: michiOriginABI,
-      chainId: defaultChain.id,
-      address: michiBackpackOriginAddress,
-      functionName: 'transferFrom',
-      args: [
-        address,
-        transferTo,
-        walletTokenId
-      ],
-    })
+    try {
+      await writeContractAsync({
+        account: address,
+        abi: michiOriginABI,
+        chainId: defaultChain.id,
+        address: michiBackpackOriginAddress,
+        functionName: 'transferFrom',
+        args: [
+          address,
+          transferTo,
+          walletTokenId
+        ],
+      })
+    } catch (err) {
+      setIsButtonLoading(false)
+      closeModal()
+      if (JSON.stringify(err).includes("InvalidAddressError")) {
+        sendInvalidAddressToast()
+      }
+    }
   }
 
   michiBackpackOriginAddress
@@ -67,6 +87,8 @@ export default function TransferWaller({
           const isValidAddress = /^0x[a-fA-F0-9]/i.test(value);
           if (isValidAddress) {
             (document.getElementById('transfer_wallet_modal') as HTMLDialogElement).showModal()
+          } else {
+            sendInvalidAddressToast()
           }
         }}>
           Transfer Wallet
