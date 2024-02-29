@@ -12,7 +12,7 @@ export default function NavBar() {
 
   const { isConnected } = useAccount();
   return (
-    <div className="bg-secondary-background text-info px-10 py-6 flex justify-between items-center w-full">
+    <div className="fixed bg-secondary-background text-info px-10 py-6 flex justify-between items-center w-full">
       <div className="flex flex-row justify-between items-center gap-6">
         <Logo />
         {isConnected && (

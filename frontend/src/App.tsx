@@ -34,7 +34,9 @@ function Layout() {
   return (
     <div className="min-h-screen w-full bg-background text-info overflow-x-hidden">
       <NavBar />
-      <Outlet />
+      <div className="pt-[88px]">
+        <Outlet />
+      </div>
       <Toaster />
     </div>
   )
