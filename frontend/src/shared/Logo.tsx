@@ -1,6 +1,11 @@
 export default function Logo() {
 
   return (
-    <div>Logo</div>
+    <img 
+      src="/assets/logo.jpeg"
+      alt="Logo"
+      width={50}
+      height={50}
+    />
   )
 }

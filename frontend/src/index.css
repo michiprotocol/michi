@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Anta&display=swap');
+
+body {
+  font-family: "Anta", sans-serif;
+}
+
 #buy_modal {
   z-index: 30 !important;
 }
