@@ -1,38 +1,31 @@
-import useTokenboundClient from "@/app/hooks/useTokenboundClient"
+import useTokenboundClient, { walletClient } from "@/app/hooks/useTokenboundClient"
 import { abi, michiBackpackHelperAddress } from "@/constants/contracts/MichiBackpack"
 import { tokenABIs } from "@/constants/contracts/tokenABIs"
 import { DepositEventLog } from "@/constants/types/DepositEventLog"
 import { DepositedToken, Token } from "@/constants/types/token"
 import { cn } from "@/lib/utils"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select"
+import TokenSelect from "@/shared/TokenSelect"
 import { useToast } from "@/shared/ui/use-toast"
 import { defaultChain, wagmiConfig } from "@/wagmi"
 import { WalletView as WalletViewType } from "@/widgets/WalletItem"
-import { BigNumberish } from "ethers"
-import { defaultAbiCoder, formatEther } from "ethers/lib/utils"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { Address, encodeFunctionData, getAddress } from "viem"
+import { BigNumberish, ethers } from "ethers"
+import { formatEther } from "ethers/lib/utils"
+import { useEffect, useMemo, useState } from "react"
+import { Address } from "viem"
 import { useAccount, useReadContract, useWatchContractEvent, useWriteContract } from "wagmi"
 import SwapToken from "./SwapToken"
-import TokenSelect from "@/shared/TokenSelect"
 
 export default function WalletView(
   {
     view,
-    setView,
+    closeWalletView,
     tokens,
     depositedTokens,
     tokenboundAccount,
     forceTokenDataUpdate
   }: {
     view: WalletViewType,
-    setView: (view: WalletViewType) => void,
+      closeWalletView: () => void,
     tokens: Token[],
     depositedTokens: DepositedToken[],
     tokenboundAccount: Address,
@@ -43,7 +36,6 @@ export default function WalletView(
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const isDepositView = useMemo(() => view === WalletViewType.DEPOSIT, [view]);
   const tokenABI = useMemo(() => selectedToken && tokenABIs[selectedToken.token_address], [selectedToken])
-  const closeWalletView = useCallback(() => setView(WalletViewType.NONE), [setView])
   const account = useAccount();
   const { toast } = useToast();
   const { tokenboundClient } = useTokenboundClient();
@@ -141,17 +133,32 @@ export default function WalletView(
     }
   }, [selectedToken, isProcessing, selectedTokenAllowance])
 
+
+
   const handleWithdraw = async (token: DepositedToken) => {
     setIsProcessing(true);
-    const res = await tokenboundClient.transferERC20({
+    const ABI = [
+      "function transfer(address to, uint256 amount)"
+    ];
+    const iface = new ethers.utils.Interface(ABI);
+    const data = iface.encodeFunctionData("transfer", [
+      account.address,
+      +input
+    ])
+    const execution = await tokenboundClient.prepareExecution({
       account: tokenboundAccount,
-      amount: +input,
-      recipientAddress: getAddress(account.address!),
-      erc20tokenAddress: token.token_address,
-      erc20tokenDecimals: token.decimals,
+      to: token.token_address,
+      value: BigInt(0),
+      data
+    })
+    console.log("🚀 ~ handleWithdraw ~ execution:", execution)
+
+    await walletClient.sendTransaction({
+      account: account,
+      data: execution
     })
     setIsProcessing(false);
-    console.log("🚀 ~ handleWithdraw ~ res:", res)
+    // console.log("🚀 ~ handleWithdraw ~ res:", res)
   }
 
   const closeModal = () => {

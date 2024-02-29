@@ -12,6 +12,9 @@ export default function MyWallets() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const account = useAccount()
 
+
+  // listen for transfer event
+
   useEffect(() => {
     const fetchUserNFTs = async () => {
       try {

@@ -6,11 +6,12 @@ import TokensTable from "@/shared/TokensTable";
 import WalletWrapper from "@/shared/WalletWrapper";
 import { defaultChain, wagmiConfig } from "@/wagmi";
 import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Address } from "viem";
 import { useAccount, useReadContract } from 'wagmi';
 import WalletViewComponent from "@/features/WalletView";
 import { cn } from "@/lib/utils";
+import TransferWallet from "@/features/TransferWallet";
 
 interface PointData {
   elPoints: number;
@@ -44,6 +45,7 @@ async function fetchPoints(address: string): Promise<ApiResponse> {
 export enum WalletView {
   DEPOSIT,
   WITHDRAW,
+  TRANSFER,
   NONE,
   // in case of adding any other views, have to edit logic of WalletView component
 }
@@ -56,6 +58,7 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
   const [forceTokensUpdate, setForceTokensUpdate] = useState({});
   const [tokens, setTokens] = useState<Token[]>([])
   const [depositedTokens, setDepositedTokens] = useState<DepositedToken[]>([])
+  const closeWalletView = useCallback(() => setView(WalletView.NONE), [setView])
 
   const tokenboundAccount = tokenboundClient.getAccount({
     tokenContract: michiBackpackOriginAddress,
@@ -138,15 +141,21 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
                 )
                 }
               </div>
+          ) : view === WalletView.TRANSFER ? (
+            <TransferWallet
+              tokenboundAccount={tokenboundAccount}
+              closeWalletView={closeWalletView}
+              walletTokenId={wallet.tokenId}
+            />
           ) : (
-              <WalletViewComponent
-                tokenboundAccount={tokenboundAccount}
-                view={view}
-                setView={setView}
-                tokens={tokens}
-                depositedTokens={depositedTokens}
-                forceTokenDataUpdate={forceTokenDataUpdate}
-              />
+                <WalletViewComponent
+                  tokenboundAccount={tokenboundAccount}
+                  view={view}
+                  closeWalletView={closeWalletView}
+                  tokens={tokens}
+                  depositedTokens={depositedTokens}
+                  forceTokenDataUpdate={forceTokenDataUpdate}
+                />
           )}
         </div>
         {WalletView.NONE === view && (
@@ -165,6 +174,12 @@ export default function WalletItem({ wallet, index }: { wallet: Wallet, index: n
                 Withdraw
               </button>
             )}
+            <button
+              className="btn btn-md"
+              onClick={() => setView(WalletView.TRANSFER)}
+            >
+              Transfer
+            </button>
           </div>
         )}
       </>
