@@ -1,5 +1,5 @@
-import useTokenboundClient, { walletClient } from "@/app/hooks/useTokenboundClient"
-import { abi, michiBackpackHelperAddress } from "@/constants/contracts/MichiBackpack"
+import useTokenboundClient from "@/app/hooks/useTokenboundClient"
+import { abi, michiBackpackHelperAddress, michiBackpackOriginAddress } from "@/constants/contracts/MichiBackpack"
 import { tokenABIs } from "@/constants/contracts/tokenABIs"
 import { DepositEvent, DepositEventLog } from "@/constants/types/DepositEventLog"
 import { DepositedToken, Token } from "@/constants/types/token"
@@ -9,10 +9,10 @@ import { useToast } from "@/shared/ui/use-toast"
 import { defaultChain, wagmiConfig } from "@/wagmi"
 import { WalletView as WalletViewType } from "@/widgets/WalletItem"
 import { BigNumber, BigNumberish, ethers } from "ethers"
-import { formatEther } from "ethers/lib/utils"
+import { formatEther, parseEther } from "ethers/lib/utils"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Address } from "viem"
-import { useAccount, useReadContract, useWatchContractEvent, useWriteContract } from "wagmi"
+import { useAccount, useReadContract, useWalletClient, useWatchContractEvent, useWriteContract } from "wagmi"
 import SwapToken from "./SwapToken"
 
 export default function WalletView(
@@ -105,6 +105,24 @@ export default function WalletView(
     },
   })
 
+  useWatchContractEvent({
+    config: wagmiConfig,
+    chainId: defaultChain.id,
+    address: selectedToken?.token_address,
+    abi: selectedToken && tokenABIs[selectedToken?.token_address],
+    eventName: "Transfer",
+    onLogs(logs) {
+      toast({
+        title: "Withdrawn successfully! 🎉",
+        // @ts-ignore
+        description: `${formatEther(logs[0].args.value)} of ${selectedToken?.symbol} were withdrawn from your account`,
+      })
+      fetchTokensData();
+      setIsProcessing(false);
+      closeWalletView();
+    },
+  })
+
   const handleDeposit = async (token: Token) => {
     setIsProcessing(true);
     if (!approvedToDeposit) {
@@ -138,14 +156,16 @@ export default function WalletView(
         ],
       })
     }
-    if (isProcessing && approvedToDeposit) {
+    if (isProcessing && approvedToDeposit && isDepositView) {
       runDeposit();
     } else {
       refetchSelectedTokenAllowance();
     }
   }, [isProcessing, approvedToDeposit])
 
-
+  const { data: walletClient } = useWalletClient({
+    chainId: defaultChain.id,
+  })
 
   const handleWithdraw = async (token: DepositedToken) => {
     setIsProcessing(true);
@@ -155,7 +175,7 @@ export default function WalletView(
     const iface = new ethers.utils.Interface(ABI);
     const data = iface.encodeFunctionData("transfer", [
       account.address,
-      +input
+      parseEther(input)
     ])
     const execution = await tokenboundClient.prepareExecution({
       account: tokenboundAccount,
@@ -163,14 +183,9 @@ export default function WalletView(
       value: BigInt(0),
       data
     })
-    console.log("🚀 ~ handleWithdraw ~ execution:", execution)
 
-    // await walletClient.sendTransaction({
-    //   account: account,
-    //   data: execution
-    // })
-    setIsProcessing(false);
-    // console.log("🚀 ~ handleWithdraw ~ res:", res)
+    // @ts-ignore
+    const res = await walletClient.sendTransaction(execution)
   }
 
   const closeModal = () => {
