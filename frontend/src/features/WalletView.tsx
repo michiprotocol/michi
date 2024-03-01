@@ -8,9 +8,9 @@ import TokenSelect from "@/shared/TokenSelect"
 import { useToast } from "@/shared/ui/use-toast"
 import { defaultChain, wagmiConfig } from "@/wagmi"
 import { WalletView as WalletViewType } from "@/widgets/WalletItem"
-import { BigNumberish, ethers } from "ethers"
+import { BigNumber, BigNumberish, ethers } from "ethers"
 import { formatEther } from "ethers/lib/utils"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Address } from "viem"
 import { useAccount, useReadContract, useWatchContractEvent, useWriteContract } from "wagmi"
 import SwapToken from "./SwapToken"
@@ -22,19 +22,20 @@ export default function WalletView(
     tokens,
     depositedTokens,
     tokenboundAccount,
-    addDepositedToken
+    fetchTokensData
   }: {
     view: WalletViewType,
-      closeWalletView: () => void,
+    closeWalletView: () => void,
     tokens: Token[],
     depositedTokens: DepositedToken[],
     tokenboundAccount: Address,
-    addDepositedToken: (token: DepositedToken) => void;
+    fetchTokensData: () => void;
   }
 ) {
   const [selectedToken, setSelectedToken] = useState<Token | DepositedToken | undefined>(undefined);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const isDepositView = useMemo(() => view === WalletViewType.DEPOSIT, [view]);
   const tokenABI = useMemo(() => selectedToken && tokenABIs[selectedToken.token_address], [selectedToken])
   const account = useAccount();
@@ -42,15 +43,19 @@ export default function WalletView(
   const { tokenboundClient } = useTokenboundClient();
   const { writeContractAsync } = useWriteContract()
 
-  const addToBalance = useCallback((token: DepositedToken) => {
-    const newToken = depositedTokens.find((t: DepositedToken) => t.token_address === token.token_address);
-    (newToken as DepositedToken).balance = token.balance + +input;
-    addDepositedToken(newToken as DepositedToken);
-  }, [addDepositedToken, depositedTokens, input])
-
   const maxAmount = useMemo(() => {
     if (selectedToken?.balance) {
-      return Number(Number(formatEther(selectedToken.balance)).toFixed(2))
+      let balance;
+      if (isDepositView) {
+        const depositedToken = depositedTokens.find((t: DepositedToken) => t.token_address === selectedToken.token_address);
+        balance = BigNumber.from(selectedToken.balance).sub(BigNumber.from(depositedToken?.balance || 0));
+        if (balance.lt(0)) {
+          balance = BigNumber.from(0);
+        }
+      } else {
+        balance = selectedToken.balance;
+      }
+      return Number(Number(formatEther(balance)).toFixed(2))
     }
   }, [selectedToken?.balance]);
 
@@ -94,7 +99,8 @@ export default function WalletView(
         title: "Deposited successfully! 🎉",
         description: `${formatEther(depositResponse.amountAfterFees)} of ${selectedToken?.symbol} were deposited into your account`,
       })
-      addToBalance(selectedToken as DepositedToken);
+      fetchTokensData();
+      setIsProcessing(false);
       closeWalletView();
     },
   })
@@ -184,6 +190,7 @@ export default function WalletView(
           />
           <div className="flex flex-col relative">
             <input
+              ref={inputRef}
               readOnly={isProcessing}
               type="text"
               placeholder="00.00"
@@ -196,7 +203,7 @@ export default function WalletView(
                 }
               }}
             />
-            <div className="absolute bottom-0 text-info/50 text-xs">
+            <div className="absolute bottom-0 text-info/50 text-xs" onClick={() => inputRef.current!.focus()}>
               <span className="relative top-2 ml-4">
                 Available: {maxAmount || 0}
               </span>

@@ -77,43 +77,37 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
     functionName: "getApprovedTokens",
   })
 
-  const addDepositedToken = useCallback((token: DepositedToken) => {
-    setDepositedTokens(
-      prev => prev.map(t => t.token_address === token.token_address ? token : t)
-    )
-  }, [setDepositedTokens])
-
-  useEffect(() => {
-    const fetchTokenBalances = async (acc: Address, isDeposited?: boolean) => {
-      setIsFetchingData(true)
-      try {
-        axios.post(`${import.meta.env.VITE_SERVER_URL}/token-balances`, {
-          tokenboundAccount: acc,
-          chain: defaultChain.id
-        }).then(({ data }: { data: Token[] }) => {
-          const newPoints = data.filter(token => {
-            return approvedTokens.data!.some(approvedToken => approvedToken.toLowerCase() === token.token_address);
-          });
-
-          if (isDeposited) {
-            // Keep disabled until deployed to Mainnet
-
-            // fetchPoints("0x0561e5b036DdcF2401c2B6b486f85451d75760A2")
-            //   .then(data => console.log(data))
-            //   .catch(error => console.error(error));
-
-            setDepositedTokens(newPoints as DepositedToken[])
-          } else {
-            setTokens(newPoints)
-          }
-          setIsFetchingData(false)
+  const fetchTokenBalances = async (acc: Address, isDeposited?: boolean) => {
+    setIsFetchingData(true)
+    try {
+      axios.post(`${import.meta.env.VITE_SERVER_URL}/token-balances`, {
+        tokenboundAccount: acc,
+        chain: defaultChain.id
+      }).then(({ data }: { data: Token[] }) => {
+        const newPoints = data.filter(token => {
+          return approvedTokens.data!.some(approvedToken => approvedToken.toLowerCase() === token.token_address);
         });
-      } catch (e) {
-        console.error(e);
-        setIsFetchingData(false)
-      }
-    }
 
+        if (isDeposited) {
+          // Keep disabled until deployed to Mainnet
+
+          // fetchPoints("0x0561e5b036DdcF2401c2B6b486f85451d75760A2")
+          //   .then(data => console.log(data))
+          //   .catch(error => console.error(error));
+
+          setDepositedTokens(newPoints as DepositedToken[])
+        } else {
+          setTokens(newPoints)
+        }
+        setIsFetchingData(false)
+      });
+    } catch (e) {
+      console.error(e);
+      setIsFetchingData(false)
+    }
+  }
+
+  const fetchTokensData = useCallback(() => {
     if (approvedTokens.data) {
       if (account.address) {
         fetchTokenBalances(account.address);
@@ -122,6 +116,10 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
         fetchTokenBalances(tokenboundAccount, true);
       }
     }
+  }, [approvedTokens.data, tokenboundAccount, account.address])
+
+  useEffect(() => {
+    fetchTokensData()
   }, [tokenboundAccount, approvedTokens.data, forceTokensUpdate])
 
   return (
@@ -134,7 +132,7 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
         >
           {view === WalletView.NONE ? (
             canWithdraw ?
-              <TokensTable tokens={depositedTokens} /> :
+              <TokensTable tokens={depositedTokens} isFetchingData={isFetchingData} /> :
               <div className="mx-auto">
                 {isFetchingData ? (
                   <span className="loading loading-spinner" />
@@ -156,7 +154,7 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
               closeWalletView={closeWalletView}
               tokens={tokens}
               depositedTokens={depositedTokens}
-              addDepositedToken={addDepositedToken}
+              fetchTokensData={fetchTokensData}
             />
           )}
         </div>

@@ -2,9 +2,11 @@ import { DepositedToken } from "@/constants/types/token";
 import { formatEther } from "ethers/lib/utils"
 
 export default function TokensTable({
-  tokens
+  tokens,
+  isFetchingData
 }: {
-    tokens: DepositedToken[]
+  tokens: DepositedToken[]
+  isFetchingData: boolean
 }) {
 
   return (
@@ -30,7 +32,7 @@ export default function TokensTable({
               return (
                 <tr key={index}>
                   <th>{name}</th>
-                  <td>{formatEther(amount)}</td>
+                  <td className="flex flex-row items-center gap-2">{formatEther(amount)} {isFetchingData && <span className="loading loading-spinner" />}</td>
                   <td>{elPoints}</td>
                   <td>{protocolPoints}</td>
                 </tr>
