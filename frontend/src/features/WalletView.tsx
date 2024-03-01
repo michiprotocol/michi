@@ -153,10 +153,10 @@ export default function WalletView(
     })
     console.log("🚀 ~ handleWithdraw ~ execution:", execution)
 
-    await walletClient.sendTransaction({
-      account: account,
-      data: execution
-    })
+    // await walletClient.sendTransaction({
+    //   account: account,
+    //   data: execution
+    // })
     setIsProcessing(false);
     // console.log("🚀 ~ handleWithdraw ~ res:", res)
   }
