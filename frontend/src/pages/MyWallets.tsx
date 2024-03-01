@@ -18,7 +18,7 @@ export default function MyWallets() {
   useEffect(() => {
     const fetchUserNFTs = async () => {
       try {
-        axios.post('http://localhost:3000/user-nfts', {
+        axios.post(`${import.meta.env.VITE_SERVER_URL}/user-nfts`, {
           address: account.address,
           chain: defaultChain.id
         }).then(({ data }: { data: Wallet[] }) => {

@@ -10,7 +10,7 @@ const chains = [defaultChain]
 
 export const wagmiConfig = createConfig(
   getDefaultConfig({
-    walletConnectProjectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID!,
+    walletConnectProjectId: import.meta.env.WALLETCONNECT_PROJECT_ID!,
     // @ts-ignore
     chains,
     appName: 'Vite Tokenbound SDK Example',

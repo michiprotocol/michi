@@ -28,7 +28,7 @@ interface ApiResponse {
 
 async function fetchPoints(address: string): Promise<ApiResponse> {
   try {
-    const response = await axios.get<ApiResponse>(`http://localhost:3000/getPoints?address=${address}`);
+    const response = await axios.get<ApiResponse>(`${import.meta.env.VITE_SERVER_URL}/getPoints?address=${address}`);
     console.log(response.data);
     return response.data;
   } catch (error) {
@@ -85,7 +85,7 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
     const fetchTokenBalances = async (acc: Address, isDeposited?: boolean) => {
       setIsFetchingData(true)
       try {
-        axios.post('http://localhost:3000/token-balances', {
+        axios.post(`${import.meta.env.VITE_SERVER_URL}/token-balances`, {
           tokenboundAccount: acc,
           chain: defaultChain.id
         }).then(({ data }: { data: Token[] }) => {
