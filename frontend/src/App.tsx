@@ -4,9 +4,10 @@ import MyWallets from "@/pages/MyWallets";
 import Trade from "@/pages/Trade";
 import NavBar from "@/widgets/NavBar";
 import { Toaster } from "./shared/ui/toaster";
+import { useAccount } from "wagmi";
+import NotConnected from "./shared/NotConnected";
 
 export default function App() {
-
   const router = createBrowserRouter([
     {
       element: (
@@ -31,11 +32,16 @@ export default function App() {
 }
 
 function Layout() {
+  const { isConnected } = useAccount();
   return (
     <div className="min-h-screen w-full bg-background text-info overflow-x-hidden">
       <NavBar />
       <div className="pt-[88px]">
-        <Outlet />
+        {isConnected ? (
+          <Outlet />
+        ) : (
+          <NotConnected />
+        )}
       </div>
       <Toaster />
     </div>
