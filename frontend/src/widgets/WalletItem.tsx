@@ -55,10 +55,18 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
   const account = useAccount()
   const [view, setView] = useState<WalletView>(WalletView.NONE)
   const [isFetchingData, setIsFetchingData] = useState(true);
-  const [forceTokensUpdate, setForceTokensUpdate] = useState<boolean>(false);
   const [tokens, setTokens] = useState<Token[]>([])
   const [depositedTokens, setDepositedTokens] = useState<DepositedToken[]>([])
   const closeWalletView = useCallback(() => setView(WalletView.NONE), [setView])
+
+  const points = useMemo(() => {
+    return Array(30).fill(null).map(_ => {
+      return {
+        elPoints: Number((Math.random() * 100000).toFixed(2)),
+        protocolPoints: Number((Math.random() * 100000).toFixed(2)),
+      }
+    })
+  }, [])
 
   const tokenboundAccount = tokenboundClient.getAccount({
     tokenContract: michiBackpackOriginAddress,
@@ -84,20 +92,23 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
         tokenboundAccount: acc,
         chain: defaultChain.id
       }).then(({ data }: { data: Token[] }) => {
-        const newPoints = data.filter(token => {
+        const newTokens = data.filter(token => {
           return approvedTokens.data!.some(approvedToken => approvedToken.toLowerCase() === token.token_address);
         });
 
         if (isDeposited) {
           // Keep disabled until deployed to Mainnet
+          const tokensWithPoints = newTokens.map((token, index) => {
+            return { ...token, ...points[index] }
+          })
 
           // fetchPoints("0x0561e5b036DdcF2401c2B6b486f85451d75760A2")
           //   .then(data => console.log(data))
           //   .catch(error => console.error(error));
 
-          setDepositedTokens(newPoints as DepositedToken[])
+          setDepositedTokens(tokensWithPoints as DepositedToken[])
         } else {
-          setTokens(newPoints)
+          setTokens(newTokens)
         }
         setIsFetchingData(false)
       });
@@ -120,7 +131,7 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
 
   useEffect(() => {
     fetchTokensData()
-  }, [tokenboundAccount, approvedTokens.data, forceTokensUpdate])
+  }, [tokenboundAccount, approvedTokens.data])
 
   return (
     <WalletWrapper address={tokenboundAccount} name="Michi Backpack" index={wallet.tokenId}>
