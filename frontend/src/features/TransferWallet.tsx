@@ -1,4 +1,4 @@
-import { michiBackpackOriginAddress, michiOriginABI } from "@/constants/contracts/MichiBackpack";
+import { michiChestOriginAddress, michiOriginABI } from "@/constants/contracts/MichiChest";
 import { Wallet } from "@/constants/types/wallet";
 import { toast } from "@/shared/ui/use-toast";
 import { defaultChain, wagmiConfig } from "@/wagmi";
@@ -23,7 +23,7 @@ export default function TransferWaller({
   useWatchContractEvent({
     config: wagmiConfig,
     chainId: defaultChain.id,
-    address: michiBackpackOriginAddress,
+    address: michiChestOriginAddress,
     abi: michiOriginABI,
     eventName: "Transfer",
     onLogs() {
@@ -54,7 +54,7 @@ export default function TransferWaller({
         account: address,
         abi: michiOriginABI,
         chainId: defaultChain.id,
-        address: michiBackpackOriginAddress,
+        address: michiChestOriginAddress,
         functionName: 'transferFrom',
         args: [
           address,
@@ -71,7 +71,7 @@ export default function TransferWaller({
     }
   }
 
-  michiBackpackOriginAddress
+  michiChestOriginAddress
   return (
     <div className="flex flex-col items-center gap-5 w-full">
       <div className="flex flex-col items-center w-2/3 gap-2">

@@ -1,5 +1,5 @@
 import useTokenboundClient from "@/app/hooks/useTokenboundClient"
-import { abi, michiBackpackHelperAddress, michiBackpackOriginAddress } from "@/constants/contracts/MichiBackpack"
+import { abi, michiChestHelperAddress, michiChestOriginAddress } from "@/constants/contracts/MichiChest"
 import { tokenABIs } from "@/constants/contracts/tokenABIs"
 import { DepositEvent, DepositEventLog } from "@/constants/types/DepositEventLog"
 import { DepositedToken, Token } from "@/constants/types/token"
@@ -67,7 +67,7 @@ export default function WalletView(
     functionName: "allowance",
     args: [
       account.address,
-      michiBackpackHelperAddress
+      michiChestHelperAddress
     ]
   })
   const approvedToDeposit = useMemo(
@@ -90,7 +90,7 @@ export default function WalletView(
   useWatchContractEvent({
     config: wagmiConfig,
     chainId: defaultChain.id,
-    address: michiBackpackHelperAddress,
+    address: michiChestHelperAddress,
     abi,
     eventName: "Deposit",
     onLogs(logs) {
@@ -133,7 +133,7 @@ export default function WalletView(
         address: token.token_address,
         functionName: 'approve',
         args: [
-          michiBackpackHelperAddress,
+          michiChestHelperAddress,
           +(maxAmount || input) * (10 ** 18)
         ],
       })
@@ -146,8 +146,8 @@ export default function WalletView(
         account: account.address,
         abi,
         chainId: defaultChain.id,
-        address: michiBackpackHelperAddress,
-        functionName: 'depositYT',
+        address: michiChestHelperAddress,
+        functionName: 'depositToken',
         args: [
           selectedToken!.token_address,
           tokenboundAccount,

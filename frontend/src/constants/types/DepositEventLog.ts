@@ -3,7 +3,7 @@ import { Address } from "viem"
 
 export interface DepositEvent {
   sender: Address;
-  backpack: Address;
+  chest: Address;
   token: Address;
   amountAfterFees: number;
   feeTaken: number;

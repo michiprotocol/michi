@@ -1,5 +1,5 @@
 import useTokenboundClient from "@/app/hooks/useTokenboundClient";
-import { abi, michiBackpackHelperAddress, michiBackpackOriginAddress } from "@/constants/contracts/MichiBackpack";
+import { abi, michiChestHelperAddress, michiChestOriginAddress } from "@/constants/contracts/MichiChest";
 import { DepositedToken, Token } from "@/constants/types/token";
 import { Wallet } from "@/constants/types/wallet";
 import TokensTable from "@/shared/TokensTable";
@@ -69,7 +69,7 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
   }, [])
 
   const tokenboundAccount = tokenboundClient.getAccount({
-    tokenContract: michiBackpackOriginAddress,
+    tokenContract: michiChestOriginAddress,
     tokenId: wallet.tokenId,
   })
 
@@ -81,7 +81,7 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
     abi,
     config: wagmiConfig,
     chainId: defaultChain.id,
-    address: michiBackpackHelperAddress,
+    address: michiChestHelperAddress,
     functionName: "getApprovedTokens",
   })
 
@@ -134,7 +134,7 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
   }, [tokenboundAccount, approvedTokens.data])
 
   return (
-    <WalletWrapper address={tokenboundAccount} name="Michi Backpack" index={wallet.tokenId}>
+    <WalletWrapper address={tokenboundAccount} name="Michi Chest" index={wallet.tokenId}>
       <>
         <div className={
           cn(
