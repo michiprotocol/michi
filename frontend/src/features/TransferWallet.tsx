@@ -31,6 +31,7 @@ export default function TransferWaller({
       toast({
         title: "Transfer is complete successfully!"
       })
+      closeModal()
     },
   })
 
