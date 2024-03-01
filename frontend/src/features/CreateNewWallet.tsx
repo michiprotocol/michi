@@ -25,7 +25,7 @@ export default function CreateNewWallet({
     abi,
     onLogs(logs) {
       const wallet = (logs[0] as unknown as BackpackCreatedLog).args;
-      const id = addWallet(
+      addWallet(
         {
           tokenId: wallet.tokenId,
           tokenAddress: wallet.nftContract,
@@ -33,7 +33,7 @@ export default function CreateNewWallet({
       );
       toast({
         title: "New Wallet Created 🎉",
-        description: `Your Wallet #${id} has been created and is now visible on your dashboard.`,
+        description: `Your Wallet #${wallet.tokenId} has been created and is now visible on your dashboard.`,
       })
       closeModal();
       setIsButtonLoading(false);
