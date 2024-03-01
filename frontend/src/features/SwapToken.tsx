@@ -10,14 +10,12 @@ export default function SwapToken({
   selectedToken,
   setSelectedToken,
   tokenboundAccount,
-  forceTokenDataUpdate
 }: {
   closeModal: () => void,
   tokens: Token[],
   selectedToken: Token,
   setSelectedToken: (token: Token) => void;
   tokenboundAccount: Address,
-  forceTokenDataUpdate: () => void;
 }) {
   const [input, setInput] = useState<string>("");
   const [receiveValue, setReceiveValue] = useState<string>("");

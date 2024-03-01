@@ -1,7 +1,7 @@
 import useTokenboundClient, { walletClient } from "@/app/hooks/useTokenboundClient"
 import { abi, michiBackpackHelperAddress } from "@/constants/contracts/MichiBackpack"
 import { tokenABIs } from "@/constants/contracts/tokenABIs"
-import { DepositEventLog } from "@/constants/types/DepositEventLog"
+import { DepositEvent, DepositEventLog } from "@/constants/types/DepositEventLog"
 import { DepositedToken, Token } from "@/constants/types/token"
 import { cn } from "@/lib/utils"
 import TokenSelect from "@/shared/TokenSelect"
@@ -10,7 +10,7 @@ import { defaultChain, wagmiConfig } from "@/wagmi"
 import { WalletView as WalletViewType } from "@/widgets/WalletItem"
 import { BigNumberish, ethers } from "ethers"
 import { formatEther } from "ethers/lib/utils"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Address } from "viem"
 import { useAccount, useReadContract, useWatchContractEvent, useWriteContract } from "wagmi"
 import SwapToken from "./SwapToken"
@@ -22,18 +22,19 @@ export default function WalletView(
     tokens,
     depositedTokens,
     tokenboundAccount,
-    forceTokenDataUpdate
+    addDepositedToken
   }: {
     view: WalletViewType,
       closeWalletView: () => void,
     tokens: Token[],
     depositedTokens: DepositedToken[],
     tokenboundAccount: Address,
-    forceTokenDataUpdate: () => void;
+    addDepositedToken: (token: DepositedToken) => void;
   }
 ) {
   const [selectedToken, setSelectedToken] = useState<Token | DepositedToken | undefined>(undefined);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [input, setInput] = useState<string>("");
   const isDepositView = useMemo(() => view === WalletViewType.DEPOSIT, [view]);
   const tokenABI = useMemo(() => selectedToken && tokenABIs[selectedToken.token_address], [selectedToken])
   const account = useAccount();
@@ -41,7 +42,12 @@ export default function WalletView(
   const { tokenboundClient } = useTokenboundClient();
   const { writeContractAsync } = useWriteContract()
 
-  const [input, setInput] = useState<string>("");
+  const addToBalance = useCallback((token: DepositedToken) => {
+    const newToken = depositedTokens.find((t: DepositedToken) => t.token_address === token.token_address);
+    (newToken as DepositedToken).balance = token.balance + +input;
+    addDepositedToken(newToken as DepositedToken);
+  }, [addDepositedToken, depositedTokens, input])
+
   const maxAmount = useMemo(() => {
     if (selectedToken?.balance) {
       return Number(Number(formatEther(selectedToken.balance)).toFixed(2))
@@ -88,7 +94,7 @@ export default function WalletView(
         title: "Deposited successfully! 🎉",
         description: `${formatEther(depositResponse.amountAfterFees)} of ${selectedToken?.symbol} were deposited into your account`,
       })
-      forceTokenDataUpdate();
+      addToBalance(selectedToken as DepositedToken);
       closeWalletView();
     },
   })
@@ -104,7 +110,7 @@ export default function WalletView(
         functionName: 'approve',
         args: [
           michiBackpackHelperAddress,
-          +input * (10 ** 18)
+          +(maxAmount || input) * (10 ** 18)
         ],
       })
     }
@@ -131,7 +137,7 @@ export default function WalletView(
     } else {
       refetchSelectedTokenAllowance();
     }
-  }, [selectedToken, isProcessing, selectedTokenAllowance])
+  }, [isProcessing, approvedToDeposit])
 
 
 
@@ -236,7 +242,6 @@ export default function WalletView(
       <dialog id="buy_modal" className="modal">
         <div className="modal-box bg-background flex flex-col items-center gap-5">
           <SwapToken
-            forceTokenDataUpdate={forceTokenDataUpdate}
             closeModal={closeModal}
             tokens={tokens as Token[]}
             selectedToken={selectedToken as Token}

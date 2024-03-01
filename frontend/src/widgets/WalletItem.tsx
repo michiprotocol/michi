@@ -55,7 +55,7 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
   const account = useAccount()
   const [view, setView] = useState<WalletView>(WalletView.NONE)
   const [isFetchingData, setIsFetchingData] = useState(true);
-  const [forceTokensUpdate, setForceTokensUpdate] = useState({});
+  const [forceTokensUpdate, setForceTokensUpdate] = useState<boolean>(false);
   const [tokens, setTokens] = useState<Token[]>([])
   const [depositedTokens, setDepositedTokens] = useState<DepositedToken[]>([])
   const closeWalletView = useCallback(() => setView(WalletView.NONE), [setView])
@@ -77,9 +77,11 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
     functionName: "getApprovedTokens",
   })
 
-  const forceTokenDataUpdate = () => {
-    setForceTokensUpdate({});
-  }
+  const addDepositedToken = useCallback((token: DepositedToken) => {
+    setDepositedTokens(
+      prev => prev.map(t => t.token_address === token.token_address ? token : t)
+    )
+  }, [setDepositedTokens])
 
   useEffect(() => {
     const fetchTokenBalances = async (acc: Address, isDeposited?: boolean) => {
@@ -154,7 +156,7 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
               closeWalletView={closeWalletView}
               tokens={tokens}
               depositedTokens={depositedTokens}
-              forceTokenDataUpdate={forceTokenDataUpdate}
+              addDepositedToken={addDepositedToken}
             />
           )}
         </div>
