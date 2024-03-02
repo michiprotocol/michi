@@ -10,7 +10,7 @@ import {
 export default function TokenSelect({ setSelectedToken, resetInput, selectedToken, tokens, isDisabled }: {
   selectedToken: Token | DepositedToken | undefined,
   tokens: (Token | DepositedToken)[],
-  setSelectedToken: (token: typeof tokens[0]) => void,
+  setSelectedToken: (token: Token) => void,
   resetInput?: () => void,
   isDisabled: boolean
 }) {
