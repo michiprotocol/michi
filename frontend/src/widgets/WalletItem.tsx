@@ -79,15 +79,6 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
     chain: defaultChain as any,
   })
 
-  const points = useMemo(() => {
-    return Array(30).fill(null).map(_ => {
-      return {
-        elPoints: Number((Math.random() * 100000).toFixed(2)),
-        protocolPoints: Number((Math.random() * 100000).toFixed(2)),
-      }
-    })
-  }, [])
-
   const tokenboundAccount = tokenboundClient.getAccount({
     tokenContract: michiChestOriginAddress,
     tokenId: wallet.tokenId,
@@ -118,15 +109,12 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
 
         if (isDeposited) {
           // Keep disabled until deployed to Mainnet
-          const tokensWithPoints = newTokens.map((token, index) => {
-            return { ...token, ...points[index] }
-          })
 
           // fetchPoints("0x0561e5b036DdcF2401c2B6b486f85451d75760A2")
           //   .then(data => console.log(data))
           //   .catch(error => console.error(error));
 
-          setDepositedTokens(tokensWithPoints as DepositedToken[])
+          setDepositedTokens(newTokens as DepositedToken[])
         } else {
           const mergedTokens = [...newTokens, ...tokens];
           const arr: Token["token_address"][] = []
