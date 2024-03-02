@@ -56,6 +56,7 @@ export default function WalletView(
       if (isDepositView) {
         const depositedToken = depositedTokens.find((t: DepositedToken) => t.token_address === selectedToken.token_address);
         balance = BigNumber.from(selectedToken.balance).sub(BigNumber.from(depositedToken?.balance || 0));
+        balance = balance.lt(0) ? 0 : balance;
       } else {
         balance = selectedToken.balance;
       }
