@@ -101,6 +101,7 @@ export default function WalletView(
     abi,
     eventName: "Deposit",
     onLogs(logs) {
+      console.log("🚀 ~ onLogs ~ logs:", logs)
       const depositResponse = (logs[0] as unknown as DepositEventLog).args;
       toast({
         title: "Deposited successfully! 🎉",
