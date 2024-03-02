@@ -132,6 +132,7 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
             const mergedTokens = [...prevTokens, ...newTokens];
             const uniqueTokens = mergedTokens.reduce((acc, token) => {
               if (!acc.some((t: Token) => t.token_address === token.token_address)) {
+                // @ts-ignore
                 acc.push(token);
               }
               return acc;
