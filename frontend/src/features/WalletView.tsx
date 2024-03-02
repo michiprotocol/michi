@@ -1,6 +1,7 @@
 import { abi, michiChestHelperAddress } from "@/constants/contracts/MichiChest"
 import { tokenABIs } from "@/constants/contracts/tokenABIs"
 import { DepositEventLog } from "@/constants/types/DepositEventLog"
+import { TransferLog } from "@/constants/types/TransferLog"
 import { DepositedToken, Token } from "@/constants/types/token"
 import { cn } from "@/lib/utils"
 import TokenSelect from "@/shared/TokenSelect"
@@ -10,7 +11,7 @@ import { WalletView as WalletViewType } from "@/widgets/WalletItem"
 import { TokenboundClient } from "@tokenbound/sdk"
 import { BigNumber, BigNumberish, ethers } from "ethers"
 import { formatEther, parseEther } from "ethers/lib/utils"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { Address } from "viem"
 import { useAccount, useReadContract, useWalletClient, useWatchContractEvent, useWriteContract } from "wagmi"
 import SwapToken from "./SwapToken"
@@ -89,6 +90,7 @@ export default function WalletView(
     abi: tokenABI,
     onLogs() {
       refetchSelectedTokenAllowance();
+      setIsProcessing(false);
     },
   })
 
@@ -117,10 +119,12 @@ export default function WalletView(
     abi: selectedToken && tokenABIs[selectedToken?.token_address],
     eventName: "Transfer",
     onLogs(logs) {
+      const transferResponse = (logs[0] as unknown as TransferLog).args;
+      const isWithdrawal = transferResponse.to === account.address
       toast({
-        title: "Withdrawn successfully! 🎉",
+        title: `${isWithdrawal ? "Withdrawn" : "Deposited"} successfully! 🎉`,
         // @ts-ignore
-        description: `${formatEther(logs[0].args.value)} of ${selectedToken?.symbol} were withdrawn from your account`,
+        description: `${formatEther(logs[0].args.value)} of ${selectedToken?.symbol} were ${isWithdrawal ? "withdrawn from" : "deposited into"} your account`,
       })
       fetchTokensData();
       setIsProcessing(false);
@@ -128,7 +132,7 @@ export default function WalletView(
     },
   })
 
-  const handleDeposit = async (token: Token) => {
+  const handleApprove = async (token: Token) => {
     setIsProcessing(true);
     if (!approvedToDeposit) {
       await writeContractAsync({
@@ -145,29 +149,21 @@ export default function WalletView(
     }
   }
 
-  useEffect(() => {
-    const runDeposit = async () => {
-      await writeContractAsync({
-        account: account.address,
-        abi,
-        chainId: defaultChain.id,
-        address: michiChestHelperAddress,
-        functionName: 'depositToken',
-        args: [
-          selectedToken!.token_address,
-          tokenboundAccount,
-          +input * (10 ** 18),
-          false
-        ],
-      })
-    }
-    if (isProcessing && approvedToDeposit && isDepositView) {
-      runDeposit();
-    } else {
-      refetchSelectedTokenAllowance();
-    }
-  }, [isProcessing, approvedToDeposit])
-
+  const runDeposit = async () => {
+    await writeContractAsync({
+      account: account.address,
+      abi,
+      chainId: defaultChain.id,
+      address: michiChestHelperAddress,
+      functionName: 'depositToken',
+      args: [
+        selectedToken!.token_address,
+        tokenboundAccount,
+        +input * (10 ** 18),
+        false
+      ],
+    })
+  }
 
   const handleWithdraw = async (token: DepositedToken) => {
     setIsProcessing(true);
@@ -236,13 +232,18 @@ export default function WalletView(
         <button
           className={cn("btn", {
             "btn-success hover:bg-success/90": isDepositView,
-            "btn-error": !isDepositView
+            "btn-error": !isDepositView,
+            "cursor-not-allowed": !selectedToken || !input || isProcessing
           }
           )}
           onClick={() => {
-            if (!selectedToken || !input) return;
+            if (!selectedToken || !input || isProcessing) return;
             if (isDepositView) {
-              handleDeposit(selectedToken as Token)
+              if (approvedToDeposit) {
+                runDeposit();
+              } else {
+                handleApprove(selectedToken as Token)
+              }
             } else {
               handleWithdraw(selectedToken as DepositedToken)
             }
@@ -251,7 +252,8 @@ export default function WalletView(
           {isProcessing &&
             <span className="loading loading-spinner" />
           }{isDepositView ? (
-            isProcessing ? "Depositing your tokens" : "Deposit"
+            approvedToDeposit ? (isProcessing ? "Depositing your tokens" : "Deposit") :
+              (isProcessing ? "Approving your deposit" : "Approve")
           ) : (
             isProcessing ? "Withdrawing your tokens" : "Withdraw"
           )}
