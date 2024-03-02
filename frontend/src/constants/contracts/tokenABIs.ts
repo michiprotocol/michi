@@ -2,7 +2,7 @@ import { Abi } from "viem";
 import { Token } from "../types/token";
 
 export const tokenABIs: Record<Token["token_address"], Abi> = {
-  "0xF28Db483773E3616DA91FDfa7b5D4090Ac40cC59": [
+  "0xf28db483773e3616da91fdfa7b5d4090ac40cc59": [
     {
       inputs: [
         { internalType: "address", name: "_SY", type: "address" },
@@ -592,7 +592,7 @@ export const tokenABIs: Record<Token["token_address"], Abi> = {
       type: "function",
     },
   ],
-  "0x28DF0f193D8e45073BC1db6F2347812C031bA818": [
+  "0x28df0f193d8e45073bc1db6f2347812c031ba818": [
     {
       inputs: [
         { internalType: "address", name: "_SY", type: "address" },
