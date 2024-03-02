@@ -18,6 +18,7 @@ export default function TokenSelect({ setSelectedToken, resetInput, selectedToke
   return (
     <Select
       onValueChange={(value) => {
+        console.log("🚀 ~ value change:", value)
         setSelectedToken(tokens.find(token => token.token_address === value)!)
         if (selectedToken?.token_address !== value && resetInput) {
           resetInput()

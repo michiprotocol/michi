@@ -77,10 +77,12 @@ export default function WalletView(
       michiChestHelperAddress
     ]
   })
+  console.log("🚀 ~ selectedTokenAllowance:", selectedTokenAllowance)
   const approvedToDeposit = useMemo(
     () => selectedTokenAllowance && Number(formatEther(selectedTokenAllowance as BigNumberish)) >= Number(input),
     [selectedTokenAllowance, input]
   );
+  console.log("🚀 ~ approvedToDeposit:", approvedToDeposit)
 
   // token approval event listener
   useWatchContractEvent({
@@ -132,8 +134,10 @@ export default function WalletView(
   })
 
   const handleDeposit = async (token: Token) => {
+    console.log("🚀 ~ handleDeposit ~ inside handleDeposit:", handleDeposit)
     setIsProcessing(true);
     if (!approvedToDeposit) {
+      console.log("🚀 ~ handleDeposit ~ approvedToDeposit before writeContract:", approvedToDeposit)
       await writeContractAsync({
         account: account.address,
         abi: tokenABI!,
@@ -149,7 +153,11 @@ export default function WalletView(
   }
 
   useEffect(() => {
+    console.log("🚀 ~ runDeposit ~ before runDeposit:")
     const runDeposit = async () => {
+      console.log('async runDeposit')
+      console.log("🚀 ~ runDeposit ~ account:", account)
+      console.log("🚀 ~ runDeposit ~ selectedToken:", selectedToken)
       await writeContractAsync({
         account: account.address,
         abi,
@@ -164,7 +172,9 @@ export default function WalletView(
         ],
       })
     }
+    console.log("🚀 ~ useEffect ~ isProcessing:", isProcessing)
     if (isProcessing && approvedToDeposit && isDepositView) {
+      console.log("🚀 ~ useEffect ~ runDeposit:")
       runDeposit();
     } else {
       refetchSelectedTokenAllowance();
@@ -244,6 +254,7 @@ export default function WalletView(
           )}
           onClick={() => {
             if (!selectedToken || !input) return;
+            console.log("🚀 ~ isDepositView: inside click", isDepositView)
             if (isDepositView) {
               handleDeposit(selectedToken as Token)
             } else {
