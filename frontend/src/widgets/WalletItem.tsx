@@ -206,7 +206,6 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
               className="btn btn-md"
               href="https://opensea.io/collection/michi-chest-1"
               target="_blank"
-              onClick={() => setView(WalletView.TRANSFER)}
             >
               Sell Wallet
             </a>
