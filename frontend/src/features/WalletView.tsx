@@ -5,7 +5,7 @@ import { DepositedToken, Token } from "@/constants/types/token"
 import { cn } from "@/lib/utils"
 import TokenSelect from "@/shared/TokenSelect"
 import { useToast } from "@/shared/ui/use-toast"
-import { ACCOUNT_IMPLEMENTATION, defaultChain, wagmiConfig } from "@/wagmi"
+import { defaultChain, wagmiConfig } from "@/wagmi"
 import { WalletView as WalletViewType } from "@/widgets/WalletItem"
 import { TokenboundClient } from "@tokenbound/sdk"
 import { BigNumber, BigNumberish, ethers } from "ethers"
@@ -48,7 +48,6 @@ export default function WalletView(
   const tokenboundClient = new TokenboundClient({
     walletClient: walletClient as any,
     chain: defaultChain as any,
-    implementationAddress: ACCOUNT_IMPLEMENTATION
   })
 
   const maxAmount = useMemo(() => {

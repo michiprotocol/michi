@@ -6,7 +6,7 @@ import WalletViewComponent from "@/features/WalletView";
 import { cn } from "@/lib/utils";
 import TokensTable from "@/shared/TokensTable";
 import WalletWrapper from "@/shared/WalletWrapper";
-import { ACCOUNT_IMPLEMENTATION, defaultChain, wagmiConfig } from "@/wagmi";
+import { defaultChain, wagmiConfig } from "@/wagmi";
 import { TokenboundClient } from "@tokenbound/sdk";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -64,7 +64,6 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
   const tokenboundClient = new TokenboundClient({
     walletClient: walletClient as any,
     chain: defaultChain as any,
-    implementationAddress: ACCOUNT_IMPLEMENTATION
   })
 
   const points = useMemo(() => {

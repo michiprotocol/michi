@@ -64,12 +64,11 @@ export default function MyWallets() {
           <span className="text-center w-2/3">Michi wallets are represented as NFTs. Deposit supported tokens into these wallets to earn points.</span>
         </div>
         <div className="flex flex-col gap-5">
-          {
-            /* {isLoading ? (
-              Array(4).fill(null).map((_, index) => (
-                <div key={index} className="skeleton w-full h-36 opacity-80"></div>
-              ))
-            ) :  */
+          {isLoading && wallets.length < 1 ? (
+            Array(4).fill(null).map((_, index) => (
+              <div key={index} className="skeleton bg-dark w-full h-36 opacity-80" />
+            ))
+          ) :
             wallets.length > 0 ? wallets.map((wallet, index) => (
               <WalletItem removeWallet={removeWallet} key={index} wallet={wallet} index={index + 1} />
             )) : <div className="mx-auto text-xl">
