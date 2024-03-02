@@ -56,13 +56,10 @@ export default function WalletView(
       if (isDepositView) {
         const depositedToken = depositedTokens.find((t: DepositedToken) => t.token_address === selectedToken.token_address);
         balance = BigNumber.from(selectedToken.balance).sub(BigNumber.from(depositedToken?.balance || 0));
-        if (balance.lt(0)) {
-          balance = BigNumber.from(0);
-        }
       } else {
         balance = selectedToken.balance;
       }
-      return Number(Number(formatEther(balance)).toFixed(2))
+      return Number(formatEther(balance))
     }
   }, [selectedToken?.balance]);
 
@@ -77,12 +74,10 @@ export default function WalletView(
       michiChestHelperAddress
     ]
   })
-  console.log("🚀 ~ selectedTokenAllowance:", selectedTokenAllowance)
   const approvedToDeposit = useMemo(
     () => selectedTokenAllowance && Number(formatEther(selectedTokenAllowance as BigNumberish)) >= Number(input),
     [selectedTokenAllowance, input]
   );
-  console.log("🚀 ~ approvedToDeposit:", approvedToDeposit)
 
   // token approval event listener
   useWatchContractEvent({
@@ -103,7 +98,6 @@ export default function WalletView(
     abi,
     eventName: "Deposit",
     onLogs(logs) {
-      console.log("🚀 ~ onLogs ~ logs:", logs)
       const depositResponse = (logs[0] as unknown as DepositEventLog).args;
       toast({
         title: "Deposited successfully! 🎉",
@@ -134,10 +128,8 @@ export default function WalletView(
   })
 
   const handleDeposit = async (token: Token) => {
-    console.log("🚀 ~ handleDeposit ~ inside handleDeposit:", handleDeposit)
     setIsProcessing(true);
     if (!approvedToDeposit) {
-      console.log("🚀 ~ handleDeposit ~ approvedToDeposit before writeContract:", approvedToDeposit)
       await writeContractAsync({
         account: account.address,
         abi: tokenABI!,
@@ -153,11 +145,7 @@ export default function WalletView(
   }
 
   useEffect(() => {
-    console.log("🚀 ~ runDeposit ~ before runDeposit:")
     const runDeposit = async () => {
-      console.log('async runDeposit')
-      console.log("🚀 ~ runDeposit ~ account:", account)
-      console.log("🚀 ~ runDeposit ~ selectedToken:", selectedToken)
       await writeContractAsync({
         account: account.address,
         abi,
@@ -172,9 +160,7 @@ export default function WalletView(
         ],
       })
     }
-    console.log("🚀 ~ useEffect ~ isProcessing:", isProcessing)
     if (isProcessing && approvedToDeposit && isDepositView) {
-      console.log("🚀 ~ useEffect ~ runDeposit:")
       runDeposit();
     } else {
       refetchSelectedTokenAllowance();
@@ -235,7 +221,7 @@ export default function WalletView(
             />
             <div className="absolute bottom-0 text-info/50 text-xs" onClick={() => inputRef.current!.focus()}>
               <span className="relative top-2 ml-4">
-                Available: {maxAmount || 0}
+                Available: {maxAmount?.toFixed(2) || 0}
               </span>
             </div>
           </div>
@@ -254,7 +240,6 @@ export default function WalletView(
           )}
           onClick={() => {
             if (!selectedToken || !input) return;
-            console.log("🚀 ~ isDepositView: inside click", isDepositView)
             if (isDepositView) {
               handleDeposit(selectedToken as Token)
             } else {
