@@ -128,20 +128,19 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
 
           setDepositedTokens(tokensWithPoints as DepositedToken[])
         } else {
-          setTokens((prevTokens) => {
-            const mergedTokens = [...prevTokens, ...newTokens];
-            const uniqueTokens = mergedTokens.reduce((acc, token) => {
-              if (!acc.some((t: Token) => t.token_address === token.token_address)) {
-                // @ts-ignore
-                acc.push(t);
-              }
-              return acc;
-            }, []);
-            return uniqueTokens;
+          const mergedTokens = [...newTokens, ...tokens];
+          const arr: Token["token_address"][] = []
+          const uniqueTokens = mergedTokens.filter((token) => {
+            if (arr.includes(token.token_address)) {
+              return false;
+            }
+            arr.push(token.token_address);
+            return true;
           });
+          setTokens(uniqueTokens);
+          setIsFetchingData(false)
         }
-        setIsFetchingData(false)
-      });
+      })
     } catch (e) {
       console.error(e);
       setIsFetchingData(false)
