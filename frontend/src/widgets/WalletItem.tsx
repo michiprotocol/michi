@@ -1,17 +1,17 @@
-import useTokenboundClient from "@/app/hooks/useTokenboundClient";
 import { abi, michiChestHelperAddress, michiChestOriginAddress } from "@/constants/contracts/MichiChest";
 import { DepositedToken, Token } from "@/constants/types/token";
 import { Wallet } from "@/constants/types/wallet";
+import TransferWallet from "@/features/TransferWallet";
+import WalletViewComponent from "@/features/WalletView";
+import { cn } from "@/lib/utils";
 import TokensTable from "@/shared/TokensTable";
 import WalletWrapper from "@/shared/WalletWrapper";
-import { defaultChain, wagmiConfig } from "@/wagmi";
+import { ACCOUNT_IMPLEMENTATION, defaultChain, wagmiConfig } from "@/wagmi";
+import { TokenboundClient } from "@tokenbound/sdk";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Address } from "viem";
-import { useAccount, useReadContract } from 'wagmi';
-import WalletViewComponent from "@/features/WalletView";
-import { cn } from "@/lib/utils";
-import TransferWallet from "@/features/TransferWallet";
+import { useAccount, useReadContract, useWalletClient } from 'wagmi';
 
 interface PointData {
   elPoints: number;
@@ -51,13 +51,21 @@ export enum WalletView {
 }
 
 export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wallet, index: number, removeWallet: (tokenId: Wallet["tokenId"]) => void }) {
-  const { tokenboundClient } = useTokenboundClient()
   const account = useAccount()
   const [view, setView] = useState<WalletView>(WalletView.NONE)
   const [isFetchingData, setIsFetchingData] = useState(true);
   const [tokens, setTokens] = useState<Token[]>([])
   const [depositedTokens, setDepositedTokens] = useState<DepositedToken[]>([])
   const closeWalletView = useCallback(() => setView(WalletView.NONE), [setView])
+
+  const { data: walletClient } = useWalletClient({
+    chainId: defaultChain.id,
+  })
+  const tokenboundClient = new TokenboundClient({
+    walletClient: walletClient as any,
+    chain: defaultChain as any,
+    implementationAddress: ACCOUNT_IMPLEMENTATION
+  })
 
   const points = useMemo(() => {
     return Array(30).fill(null).map(_ => {

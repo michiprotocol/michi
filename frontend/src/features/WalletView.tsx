@@ -1,16 +1,16 @@
-import useTokenboundClient from "@/app/hooks/useTokenboundClient"
-import { abi, michiChestHelperAddress, michiChestOriginAddress } from "@/constants/contracts/MichiChest"
+import { abi, michiChestHelperAddress } from "@/constants/contracts/MichiChest"
 import { tokenABIs } from "@/constants/contracts/tokenABIs"
-import { DepositEvent, DepositEventLog } from "@/constants/types/DepositEventLog"
+import { DepositEventLog } from "@/constants/types/DepositEventLog"
 import { DepositedToken, Token } from "@/constants/types/token"
 import { cn } from "@/lib/utils"
 import TokenSelect from "@/shared/TokenSelect"
 import { useToast } from "@/shared/ui/use-toast"
-import { defaultChain, wagmiConfig } from "@/wagmi"
+import { ACCOUNT_IMPLEMENTATION, defaultChain, wagmiConfig } from "@/wagmi"
 import { WalletView as WalletViewType } from "@/widgets/WalletItem"
+import { TokenboundClient } from "@tokenbound/sdk"
 import { BigNumber, BigNumberish, ethers } from "ethers"
 import { formatEther, parseEther } from "ethers/lib/utils"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Address } from "viem"
 import { useAccount, useReadContract, useWalletClient, useWatchContractEvent, useWriteContract } from "wagmi"
 import SwapToken from "./SwapToken"
@@ -40,8 +40,16 @@ export default function WalletView(
   const tokenABI = useMemo(() => selectedToken && tokenABIs[selectedToken.token_address], [selectedToken])
   const account = useAccount();
   const { toast } = useToast();
-  const { tokenboundClient } = useTokenboundClient();
   const { writeContractAsync } = useWriteContract()
+
+  const { data: walletClient } = useWalletClient({
+    chainId: defaultChain.id,
+  })
+  const tokenboundClient = new TokenboundClient({
+    walletClient: walletClient as any,
+    chain: defaultChain as any,
+    implementationAddress: ACCOUNT_IMPLEMENTATION
+  })
 
   const maxAmount = useMemo(() => {
     if (selectedToken?.balance) {
@@ -163,9 +171,6 @@ export default function WalletView(
     }
   }, [isProcessing, approvedToDeposit])
 
-  const { data: walletClient } = useWalletClient({
-    chainId: defaultChain.id,
-  })
 
   const handleWithdraw = async (token: DepositedToken) => {
     setIsProcessing(true);
