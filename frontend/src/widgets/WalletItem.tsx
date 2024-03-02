@@ -54,7 +54,20 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
   const account = useAccount()
   const [view, setView] = useState<WalletView>(WalletView.NONE)
   const [isFetchingData, setIsFetchingData] = useState(true);
-  const [tokens, setTokens] = useState<Token[]>([])
+  const [tokens, setTokens] = useState<Token[]>([
+    {
+      "token_address": "0x28df0f193d8e45073bc1db6f2347812c031ba818",
+      "symbol": "YT-rsETH-25APR2024",
+      "decimals": "18",
+      balance: 0
+    },
+    {
+      "token_address": "0xf28db483773e3616da91fdfa7b5d4090ac40cc59",
+      "symbol": "YT-weETH-25APR2024",
+      "decimals": "18",
+      balance: 0
+    }
+  ])
   const [depositedTokens, setDepositedTokens] = useState<DepositedToken[]>([])
   const closeWalletView = useCallback(() => setView(WalletView.NONE), [setView])
 
@@ -115,7 +128,16 @@ export default function WalletItem({ wallet, index, removeWallet }: { wallet: Wa
 
           setDepositedTokens(tokensWithPoints as DepositedToken[])
         } else {
-          setTokens(newTokens)
+          setTokens((prevTokens) => {
+            const mergedTokens = [...prevTokens, ...newTokens];
+            const uniqueTokens = mergedTokens.reduce((acc, token) => {
+              if (!acc.some((t: Token) => t.token_address === token.token_address)) {
+                acc.push(token);
+              }
+              return acc;
+            }, []);
+            return uniqueTokens;
+          });
         }
         setIsFetchingData(false)
       });
