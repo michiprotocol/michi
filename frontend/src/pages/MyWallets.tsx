@@ -1,4 +1,4 @@
-import { michiChestOriginAddress } from "@/constants/contracts/MichiChest";
+import { michiBackpackOriginAddress } from "@/constants/contracts/MichiBackpack";
 import { Wallet } from "@/constants/types/wallet";
 import CreateNewWallet from "@/features/CreateNewWallet";
 import { defaultChain } from "@/wagmi";
@@ -22,7 +22,7 @@ export default function MyWallets() {
           address: account.address,
           chain: defaultChain.id
         }).then(({ data }: { data: Wallet[] }) => {
-          const wallets = data.filter(wallet => wallet.tokenAddress === michiChestOriginAddress.toLowerCase());
+          const wallets = data.filter(wallet => wallet.tokenAddress === michiBackpackOriginAddress.toLowerCase());
           setWallets(wallets)
         });
 

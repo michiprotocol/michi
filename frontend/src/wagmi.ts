@@ -2,9 +2,10 @@ import {
   getDefaultConfig
 } from "connectkit";
 import { createConfig } from "wagmi";
-import { arbitrum } from 'wagmi/chains';
+import { arbitrum, sepolia } from 'wagmi/chains';
 
-export const defaultChain = arbitrum;
+export const defaultChain = sepolia;
+
 const chains = [defaultChain]
 
 export const wagmiConfig = createConfig(
@@ -12,8 +13,8 @@ export const wagmiConfig = createConfig(
     walletConnectProjectId: import.meta.env.WALLETCONNECT_PROJECT_ID!,
     // @ts-ignore
     chains,
-    appName: 'Michi',
-    appDescription: 'Trade your airdrop points with ease',
+    appName: 'Vite Tokenbound SDK Example',
+    appDescription: 'Tokenbound SDK Example',
     appUrl: 'https://tokenbound.org',
   })
 )

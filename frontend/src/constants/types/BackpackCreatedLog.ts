@@ -1,8 +1,8 @@
 import { Address } from "viem"
 
-export interface ChestCreatedLog {
+export interface BackpackCreatedLog {
   args: {
-    chest: Address;
+    backpack: Address;
     sender: Address;
     nftContract: Address;
     tokenId: string;
