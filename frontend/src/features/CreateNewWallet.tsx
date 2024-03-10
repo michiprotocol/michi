@@ -53,7 +53,20 @@ export default function CreateNewWallet({
       args: [
         1,
       ],
-    })
+    }).catch((e) => {
+      console.error(e);
+      setIsButtonLoading(false);
+
+      // 4001 means user rejected the transaction
+      if (e.cause?.code !== 4001) {
+        toast({
+          title: "Error",
+          description: e.message,
+        })
+      }
+
+      closeModal();
+    });
   }
 
 

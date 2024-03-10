@@ -1,6 +1,7 @@
 # Getting Started
 
-Run `yarn dev` in your terminal, and then open [localhost:5173](http://localhost:5173) in your browser.
+- Copy make a copy `.env.example` file and name it `.env`.
+- Run `yarn install` & `yarn dev` in your terminal, and then open [localhost:5173](http://localhost:5173) in your browser.
 
 Once the webpage has loaded, changes made to files inside the `src/` directory (e.g. `src/App.tsx`) will automatically update the webpage.
 

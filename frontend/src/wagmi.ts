@@ -2,15 +2,14 @@ import {
   getDefaultConfig
 } from "connectkit";
 import { createConfig } from "wagmi";
-import { arbitrum } from 'wagmi/chains';
+import { Chain, arbitrum } from 'wagmi/chains';
 
 export const defaultChain = arbitrum;
-const chains = [defaultChain]
+const chains = [defaultChain] as [Chain];
 
 export const wagmiConfig = createConfig(
   getDefaultConfig({
-    walletConnectProjectId: import.meta.env.WALLETCONNECT_PROJECT_ID!,
-    // @ts-ignore
+    walletConnectProjectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID!,
     chains,
     appName: 'Michi',
     appDescription: 'Trade your airdrop points with ease',
