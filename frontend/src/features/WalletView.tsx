@@ -118,7 +118,7 @@ export default function WalletView(
 
 
   useEffect(() => {
-    if (isWithdrawalConfirming) {
+    if (isWithdrawalConfirmed) {
       toast({
         title: "Withdrawn successfully! 🎉",
         description: `${input} of ${selectedToken?.symbol} were withdrawn from your account`,
@@ -127,7 +127,7 @@ export default function WalletView(
       setIsProcessing(false);
       closeWalletView();
     }
-  }, [isWithdrawalConfirming])
+  }, [isWithdrawalConfirmed])
 
   
 

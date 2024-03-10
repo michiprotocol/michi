@@ -45,7 +45,8 @@ export default function MyWallets() {
 
   const addWallet = (wallet: Wallet) => {
     if (wallet.tokenId !== wallets[wallets.length - 1].tokenId) {
-      const newWallets = ([...wallets, wallet])
+      // sort wallets by descending order based of the tokenId
+      const newWallets = ([...wallets, wallet]).sort((a, b) => parseInt(b.tokenId) - parseInt(a.tokenId));
       setWallets(newWallets)
       return newWallets.length;
     }
