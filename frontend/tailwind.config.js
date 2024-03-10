@@ -9,19 +9,32 @@ module.exports = {
         secondary: "#A3A5D3",
         action: "#FF852C",
         label: "#5d5f61",
-        blue: "#1790FF",
-        gray: "#425C6F",
+        // blue: "#1790FF",
+        // gray: "#425C6F",
+        "michi-blue": {
+          100: "#8EE3FB",
+        },
       },
       backgroundColor: {
         background: "#222222",
-        "secondary-background": "#282828",
+        "secondary-background": "black",
         "placeholder-background": "#425C6F",
         dark: "#2D2D37",
         success: "#27d564",
       },
     },
   },
-  plugins: [require("daisyui")],
+  plugins: [
+    require("daisyui"),
+    function ({ addUtilities }) {
+      const newUtilities = {
+        '.custom-drop-shadow': {
+          filter: 'drop-shadow(rgb(53, 205, 248) 0px 0px 8px)',
+        }
+      };
+      addUtilities(newUtilities, ["responsive", "hover"]);
+    },
+  ],
   daisyui: {
     themes: [
       {

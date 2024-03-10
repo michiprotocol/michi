@@ -8,8 +8,8 @@ export default function Logo() {
       <img
         src="/assets/logo.png"
         alt="Logo"
-        width={50}
-        height={50}
+        width={30}
+        height={30}
       />
     </Link>
   )

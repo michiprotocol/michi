@@ -36,7 +36,7 @@ function Layout() {
   return (
     <div className="min-h-screen w-full bg-background text-info overflow-x-hidden">
       <NavBar />
-      <div className="pt-[88px]">
+      <div className="pt-[58px]">
         {isConnected ? (
           <Outlet />
         ) : (

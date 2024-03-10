@@ -249,9 +249,10 @@ export default function WalletView(
             }
           }}
         >
-          {isPending || isConfirming &&
+          {(isProcessing || isPending || isConfirming) &&
             <span className="loading loading-spinner" />
-          }{isDepositView ? (
+          }
+          {isDepositView ? (
             approvedToDeposit ? (isConfirming ? "Depositing your tokens" : "Deposit") :
               (isPending ? "Approving your deposit" : "Approve")
           ) : (
