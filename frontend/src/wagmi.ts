@@ -2,16 +2,14 @@ import {
   getDefaultConfig
 } from "connectkit";
 import { createConfig } from "wagmi";
-import { arbitrum, sepolia } from 'wagmi/chains';
+import { Chain, arbitrum, sepolia } from 'wagmi/chains';
 
 export const defaultChain = sepolia;
-
-const chains = [defaultChain]
+const chains = [defaultChain] as [Chain];
 
 export const wagmiConfig = createConfig(
   getDefaultConfig({
-    walletConnectProjectId: import.meta.env.WALLETCONNECT_PROJECT_ID!,
-    // @ts-ignore
+    walletConnectProjectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID!,
     chains,
     appName: 'Vite Tokenbound SDK Example',
     appDescription: 'Tokenbound SDK Example',

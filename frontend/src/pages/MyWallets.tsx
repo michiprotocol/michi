@@ -23,6 +23,12 @@ export default function MyWallets() {
           chain: defaultChain.id
         }).then(({ data }: { data: Wallet[] }) => {
           const wallets = data.filter(wallet => wallet.tokenAddress === michiBackpackOriginAddress.toLowerCase());
+          if (["0xe57f2acb1f560c244a110a6f07f3665ab24d398d", "0x762778fd9ff6c1f78170789c69b7ae060898fae7"].includes(account.address!.toLowerCase())) {
+            wallets.push({
+              tokenId: "0",
+              tokenAddress: michiBackpackOriginAddress,
+            })
+          }
           setWallets(wallets)
         });
 
@@ -39,7 +45,8 @@ export default function MyWallets() {
 
   const addWallet = (wallet: Wallet) => {
     if (wallet.tokenId !== wallets[wallets.length - 1].tokenId) {
-      const newWallets = ([...wallets, wallet])
+      // sort wallets by descending order based of the tokenId
+      const newWallets = ([...wallets, wallet]).sort((a, b) => parseInt(b.tokenId) - parseInt(a.tokenId));
       setWallets(newWallets)
       return newWallets.length;
     }

@@ -75,24 +75,25 @@ export default function TransferWaller({
   return (
     <div className="flex flex-col items-center gap-5 w-full">
       <div className="flex flex-col items-center w-2/3 gap-2">
-        <span className="text-info">Enter recipient wallet address</span>
+        <span className="text-info">Enter your wallet price</span>
         <input
           type="text"
           className="input input-bordered	bg-background rounded-md border-2 !outline-none w-full text-center text-white"
-          placeholder="0x0cD5....4091"
+          placeholder="0.01 ETH"
           value={value}
           onChange={(e) => setValue(e.target.value)} />
       </div>
       <div className="flex flex-row justify-center gap-5">
         <button className="btn btn-md btn-accent" onClick={() => {
-          const isValidAddress = /^0x[a-fA-F0-9]/i.test(value);
+          // const isValidAddress = /^0x[a-fA-F0-9]/i.test(value);
+          const isValidAddress = true;
           if (isValidAddress) {
             (document.getElementById('transfer_wallet_modal') as HTMLDialogElement).showModal()
           } else {
             sendInvalidAddressToast()
           }
         }}>
-          Transfer Wallet
+          Sell Wallet
         </button>
         <button
           className="btn btn-ghost"
@@ -104,11 +105,11 @@ export default function TransferWaller({
       <dialog id="transfer_wallet_modal" className="modal">
         <div className="modal-box bg-background flex flex-col items-center gap-5">
           <p className="text-lg">
-            Transferring your wallet will transfer custody of all assets in the wallet and all points accrued to this wallet
+            Selling your wallet will transfer custody of all assets in the wallet and all points accrued to this wallet
           </p>
           <button className="btn" onClick={() => handleTransfer(value as Address)}>
             {isButtonLoading && <span className="loading loading-spinner" />}
-            {isButtonLoading ? "Transferring the" : "Transfer"} Wallet
+            {isButtonLoading ? "Selling the" : "Sell"} Wallet
           </button>
         </div>
         <form method="dialog" className="modal-backdrop">

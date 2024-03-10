@@ -1,6 +1,5 @@
 import { abi, michiBackpackHelperAddress } from "@/constants/contracts/MichiBackpack"
 import { tokenABIs } from "@/constants/contracts/tokenABIs"
-import { DepositEventLog } from "@/constants/types/DepositEventLog"
 import { DepositedToken, Token } from "@/constants/types/token"
 import { cn } from "@/lib/utils"
 import TokenSelect from "@/shared/TokenSelect"
@@ -11,8 +10,8 @@ import { TokenboundClient } from "@tokenbound/sdk"
 import { BigNumber, BigNumberish, ethers } from "ethers"
 import { formatEther, parseEther } from "ethers/lib/utils"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Address } from "viem"
-import { useAccount, useReadContract, useWalletClient, useWatchContractEvent, useWriteContract } from "wagmi"
+import { Address, Hash } from "viem"
+import { useAccount, useReadContract, useWaitForTransactionReceipt, useWalletClient, useWatchContractEvent, useWriteContract } from "wagmi"
 import SwapToken from "./SwapToken"
 
 export default function WalletView(
@@ -35,12 +34,22 @@ export default function WalletView(
   const [selectedToken, setSelectedToken] = useState<Token | DepositedToken | undefined>(undefined);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
+  const [withdrawHash, setWithdrawalHash] = useState<Hash>();
   const inputRef = useRef<HTMLInputElement>(null);
   const isDepositView = useMemo(() => view === WalletViewType.DEPOSIT, [view]);
   const tokenABI = useMemo(() => selectedToken && tokenABIs[selectedToken.token_address], [selectedToken])
   const account = useAccount();
   const { toast } = useToast();
-  const { writeContractAsync } = useWriteContract()
+  const { writeContractAsync, isPending, data: hash } = useWriteContract()
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    })
+
+    const { isLoading: isWithdrawalConfirming, isSuccess: isWithdrawalConfirmed } =
+    useWaitForTransactionReceipt({
+      hash: withdrawHash,
+    })
 
   const { data: walletClient } = useWalletClient({
     chainId: defaultChain.id,
@@ -56,6 +65,7 @@ export default function WalletView(
       if (isDepositView) {
         const depositedToken = depositedTokens.find((t: DepositedToken) => t.token_address === selectedToken.token_address);
         balance = BigNumber.from(selectedToken.balance).sub(BigNumber.from(depositedToken?.balance || 0));
+        balance = balance.lt(0) ? 0 : balance;
       } else {
         balance = selectedToken.balance;
       }
@@ -88,46 +98,38 @@ export default function WalletView(
     abi: tokenABI,
     onLogs() {
       refetchSelectedTokenAllowance();
+      setIsProcessing(false);
     },
   })
 
-  useWatchContractEvent({
-    config: wagmiConfig,
-    chainId: defaultChain.id,
-    address: michiBackpackHelperAddress,
-    abi,
-    eventName: "Deposit",
-    onLogs(logs) {
-      const depositResponse = (logs[0] as unknown as DepositEventLog).args;
+  useEffect(() => {
+    if (isConfirmed) {
       toast({
         title: "Deposited successfully! 🎉",
-        description: `${formatEther(depositResponse.amountAfterFees)} of ${selectedToken?.symbol} were deposited into your account`,
+        description: `${input} of ${selectedToken?.symbol} were deposited into your account`,
       })
       fetchTokensData();
       setIsProcessing(false);
       closeWalletView();
-    },
-  })
+    }
+  }, [isConfirmed])
 
-  useWatchContractEvent({
-    config: wagmiConfig,
-    chainId: defaultChain.id,
-    address: selectedToken?.token_address,
-    abi: selectedToken && tokenABIs[selectedToken?.token_address],
-    eventName: "Transfer",
-    onLogs(logs) {
+
+  useEffect(() => {
+    if (isWithdrawalConfirmed) {
       toast({
         title: "Withdrawn successfully! 🎉",
-        // @ts-ignore
-        description: `${formatEther(logs[0].args.value)} of ${selectedToken?.symbol} were withdrawn from your account`,
+        description: `${input} of ${selectedToken?.symbol} were withdrawn from your account`,
       })
       fetchTokensData();
       setIsProcessing(false);
       closeWalletView();
-    },
-  })
+    }
+  }, [isWithdrawalConfirmed])
 
-  const handleDeposit = async (token: Token) => {
+  
+
+  const handleApprove = async (token: Token) => {
     setIsProcessing(true);
     if (!approvedToDeposit) {
       await writeContractAsync({
@@ -144,29 +146,21 @@ export default function WalletView(
     }
   }
 
-  useEffect(() => {
-    const runDeposit = async () => {
-      await writeContractAsync({
-        account: account.address,
-        abi,
-        chainId: defaultChain.id,
-        address: michiBackpackHelperAddress,
-        functionName: 'depositYT',
-        args: [
-          selectedToken!.token_address,
-          tokenboundAccount,
-          +input * (10 ** 18),
-          false
-        ],
-      })
-    }
-    if (isProcessing && approvedToDeposit && isDepositView) {
-      runDeposit();
-    } else {
-      refetchSelectedTokenAllowance();
-    }
-  }, [isProcessing, approvedToDeposit])
-
+  const runDeposit = async () => {
+    await writeContractAsync({
+      account: account.address,
+      abi,
+      chainId: defaultChain.id,
+      address: michiBackpackHelperAddress,
+      functionName: 'depositToken',
+      args: [
+        selectedToken!.token_address,
+        tokenboundAccount,
+        +input * (10 ** 18),
+        false
+      ],
+    })
+  }
 
   const handleWithdraw = async (token: DepositedToken) => {
     setIsProcessing(true);
@@ -186,7 +180,8 @@ export default function WalletView(
     })
 
     // @ts-ignore
-    const res = await walletClient.sendTransaction(execution)
+    const res = await walletClient.sendTransaction(execution);
+    setWithdrawalHash(res);
   }
 
   const closeModal = () => {
@@ -235,22 +230,28 @@ export default function WalletView(
         <button
           className={cn("btn", {
             "btn-success hover:bg-success/90": isDepositView,
-            "btn-error": !isDepositView
+            "btn-error": !isDepositView,
+            "cursor-not-allowed": !selectedToken || !input || isProcessing
           }
           )}
           onClick={() => {
-            if (!selectedToken || !input) return;
+            if (!selectedToken || !input || isProcessing) return;
             if (isDepositView) {
-              handleDeposit(selectedToken as Token)
+              if (approvedToDeposit) {
+                runDeposit();
+              } else {
+                handleApprove(selectedToken as Token)
+              }
             } else {
               handleWithdraw(selectedToken as DepositedToken)
             }
           }}
         >
-          {isProcessing &&
+          {isPending || isConfirming || isProcessing &&
             <span className="loading loading-spinner" />
           }{isDepositView ? (
-            isProcessing ? "Depositing your tokens" : "Deposit"
+            approvedToDeposit ? (isConfirming ? "Depositing your tokens" : "Deposit") :
+              (isPending ? "Approving your deposit" : "Approve")
           ) : (
             isProcessing ? "Withdrawing your tokens" : "Withdraw"
           )}

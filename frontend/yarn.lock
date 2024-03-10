@@ -1818,12 +1818,12 @@
   dependencies:
     "@tanstack/query-core" "5.24.1"
 
-"@tokenbound/sdk@workspace:^":
-  version "0.4.5"
-  resolved "https://registry.yarnpkg.com/@tokenbound/sdk/-/sdk-0.4.5.tgz#aee9d4d9c45b15c45c56f1b0e342dd4e058b44ff"
-  integrity sha512-kfvvrYBOVVhuId74ZFkN6kd/YSTFQCUnOT/yv0L22fqIQVF0i58G0bYoSgQmmW2Yypv7AglIazKXFTRuwrnByg==
+"@tokenbound/sdk@0.4.6":
+  version "0.4.6"
+  resolved "https://registry.yarnpkg.com/@tokenbound/sdk/-/sdk-0.4.6.tgz#8ce55fa9fa96d960d1f084ad6ee8b356c74fffed"
+  integrity sha512-beashcdoLMSgn+SOd8uNsdMMGzCjD7J6CyRO2/LBBp7E+MO+H7hj4ZFo5eU+d2iRVMtRAvhh3GvQEw9e1eA2PA==
   dependencies:
-    viem "^1.19.11"
+    viem "^1.21.4"
 
 "@types/babel__core@^7.20.5":
   version "7.20.5"
@@ -5158,7 +5158,7 @@ viem@2.x:
     isows "1.0.3"
     ws "8.13.0"
 
-viem@^1.0.0, viem@^1.1.4, viem@^1.19.11:
+viem@^1.0.0, viem@^1.1.4, viem@^1.21.4:
   version "1.21.4"
   resolved "https://registry.yarnpkg.com/viem/-/viem-1.21.4.tgz#883760e9222540a5a7e0339809202b45fe6a842d"
   integrity sha512-BNVYdSaUjeS2zKQgPs+49e5JKocfo60Ib2yiXOWBT6LuVxY1I/6fFX3waEtpXvL1Xn4qu+BVitVtMh9lyThyhQ==

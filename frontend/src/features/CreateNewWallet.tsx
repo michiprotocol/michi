@@ -1,10 +1,10 @@
 import { abi, michiBackpackHelperAddress } from "@/constants/contracts/MichiBackpack";
-import { BackpackCreatedLog } from "@/constants/types/BackpackCreatedLog";
 import { Wallet } from "@/constants/types/wallet";
-import { defaultChain, wagmiConfig } from "@/wagmi";
-import { useState } from "react";
-import { useToast } from "@/shared/ui/use-toast"
-import { useAccount, useWatchContractEvent, useWriteContract } from 'wagmi'
+import { decodeEthereumLog } from "@/lib/utils";
+import { useToast } from "@/shared/ui/use-toast";
+import { defaultChain } from "@/wagmi";
+import { useEffect } from "react";
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 
 export default function CreateNewWallet({
   addWallet
@@ -12,37 +12,35 @@ export default function CreateNewWallet({
   addWallet: (wallet: Wallet) => void
 }) {
   const { toast } = useToast()
-  const { writeContractAsync } = useWriteContract()
+  const { writeContractAsync, isPending, data: hash } = useWriteContract()
+  const { isLoading: isConfirming, isSuccess: isConfirmed, data } =
+  useWaitForTransactionReceipt({
+    hash,
+  })
   const account = useAccount();
+  const isLoading = isPending || isConfirming;
 
-  const [isButtonLoading, setIsButtonLoading] = useState(false);
+  useEffect(() => {
+    if (isConfirmed) {
+      const chestCreatedLogData = data.logs[data.logs.length - 1].data;
+      const logInfo = decodeEthereumLog(chestCreatedLogData);
 
-  useWatchContractEvent({
-    config: wagmiConfig,
-    chainId: defaultChain.id,
-    address: michiBackpackHelperAddress,
-    eventName: 'BackpackCreated',
-    abi,
-    onLogs(logs) {
-      const wallet = (logs[0] as unknown as BackpackCreatedLog).args;
       addWallet(
         {
-          tokenId: wallet.tokenId,
-          tokenAddress: wallet.nftContract,
+          tokenId: logInfo.numericValue,
+          tokenAddress: logInfo.address,
         }
       );
       toast({
         title: "New Wallet Created 🎉",
-        description: `Your Wallet #${wallet.tokenId} has been created and is now visible on your dashboard.`,
+        description: `Your Wallet #${logInfo.numericValue} has been created and is now visible on your dashboard.`,
       })
       closeModal();
-      setIsButtonLoading(false);
-    },
-  })
+    }
+
+  }, [isConfirmed]);
 
   const createNewWallet = async () => {
-    setIsButtonLoading(true);
-
     // request to create a new wallet
     await writeContractAsync({
       account: account.address,
@@ -53,7 +51,19 @@ export default function CreateNewWallet({
       args: [
         1,
       ],
-    })
+    }).catch((e) => {
+      console.error(e);
+
+      // 4001 means user rejected the transaction
+      if (e.cause?.code !== 4001) {
+        toast({
+          title: "Error",
+          description: e.message,
+        })
+      }
+
+      closeModal();
+    });
   }
 
 
@@ -69,8 +79,8 @@ export default function CreateNewWallet({
             Creating a wallet involves minting a Michi NFT and registering a wallet that is owned by the NFT.  Once minted, the wallet will show up on your dashboard.
           </p>
           <button className="btn" onClick={createNewWallet}>
-            {isButtonLoading && <span className="loading loading-spinner" />}
-            {isButtonLoading ? "Creating a" : "Create"} New Wallet
+            {isLoading && <span className="loading loading-spinner" />}
+            {isLoading ? "Creating a" : "Create"} New Wallet
           </button>
         </div>
         <form method="dialog" className="modal-backdrop">

@@ -33,8 +33,8 @@ export default function TokensTable({
                 <tr key={index}>
                   <th>{name}</th>
                   <td className="flex flex-row items-center gap-2">{formatEther(amount)} {isFetchingData && <span className="loading loading-spinner" />}</td>
-                  <td>{elPoints}</td>
-                  <td>{protocolPoints}</td>
+                  <td>0</td>
+                  <td>0</td>
                 </tr>
               )
             })
