@@ -11,9 +11,9 @@ import { WalletView as WalletViewType } from "@/widgets/WalletItem"
 import { TokenboundClient } from "@tokenbound/sdk"
 import { BigNumber, BigNumberish, ethers } from "ethers"
 import { formatEther, parseEther } from "ethers/lib/utils"
-import { useMemo, useRef, useState } from "react"
-import { Address } from "viem"
-import { useAccount, useReadContract, useWalletClient, useWatchContractEvent, useWriteContract } from "wagmi"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Address, Hash } from "viem"
+import { useAccount, useReadContract, useWalletClient, useWatchContractEvent, useWriteContract, useWaitForTransactionReceipt } from "wagmi"
 import SwapToken from "./SwapToken"
 
 export default function WalletView(
@@ -36,12 +36,22 @@ export default function WalletView(
   const [selectedToken, setSelectedToken] = useState<Token | DepositedToken | undefined>(undefined);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
+  const [withdrawHash, setWithdrawalHash] = useState<Hash>();
   const inputRef = useRef<HTMLInputElement>(null);
   const isDepositView = useMemo(() => view === WalletViewType.DEPOSIT, [view]);
   const tokenABI = useMemo(() => selectedToken && tokenABIs[selectedToken.token_address], [selectedToken])
   const account = useAccount();
   const { toast } = useToast();
-  const { writeContractAsync } = useWriteContract()
+  const { writeContractAsync, isPending, data: hash } = useWriteContract()
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    })
+
+    const { isLoading: isWithdrawalConfirming, isSuccess: isWithdrawalConfirmed } =
+    useWaitForTransactionReceipt({
+      hash: withdrawHash,
+    })
 
   const { data: walletClient } = useWalletClient({
     chainId: defaultChain.id,
@@ -94,43 +104,32 @@ export default function WalletView(
     },
   })
 
-  useWatchContractEvent({
-    config: wagmiConfig,
-    chainId: defaultChain.id,
-    address: michiChestHelperAddress,
-    abi,
-    eventName: "Deposit",
-    onLogs(logs) {
-      const depositResponse = (logs[0] as unknown as DepositEventLog).args;
+  useEffect(() => {
+    if (isConfirmed) {
       toast({
         title: "Deposited successfully! 🎉",
-        description: `${formatEther(depositResponse.amountAfterFees)} of ${selectedToken?.symbol} were deposited into your account`,
+        description: `${input} of ${selectedToken?.symbol} were deposited into your account`,
       })
       fetchTokensData();
       setIsProcessing(false);
       closeWalletView();
-    },
-  })
+    }
+  }, [isConfirmed])
 
-  useWatchContractEvent({
-    config: wagmiConfig,
-    chainId: defaultChain.id,
-    address: selectedToken?.token_address,
-    abi: selectedToken && tokenABIs[selectedToken?.token_address],
-    eventName: "Transfer",
-    onLogs(logs) {
-      const transferResponse = (logs[0] as unknown as TransferLog).args;
-      const isWithdrawal = transferResponse.to === account.address
+
+  useEffect(() => {
+    if (isWithdrawalConfirmed) {
       toast({
-        title: `${isWithdrawal ? "Withdrawn" : "Deposited"} successfully! 🎉`,
-        // @ts-ignore
-        description: `${formatEther(logs[0].args.value)} of ${selectedToken?.symbol} were ${isWithdrawal ? "withdrawn from" : "deposited into"} your account`,
+        title: "Withdrawn successfully! 🎉",
+        description: `${input} of ${selectedToken?.symbol} were withdrawn from your account`,
       })
       fetchTokensData();
       setIsProcessing(false);
       closeWalletView();
-    },
-  })
+    }
+  }, [isWithdrawalConfirmed])
+
+  
 
   const handleApprove = async (token: Token) => {
     setIsProcessing(true);
@@ -183,7 +182,8 @@ export default function WalletView(
     })
 
     // @ts-ignore
-    const res = await walletClient.sendTransaction(execution)
+    const res = await walletClient.sendTransaction(execution);
+    setWithdrawalHash(res);
   }
 
   const closeModal = () => {
@@ -249,11 +249,12 @@ export default function WalletView(
             }
           }}
         >
-          {isProcessing &&
+          {(isProcessing || isPending || isConfirming) &&
             <span className="loading loading-spinner" />
-          }{isDepositView ? (
-            approvedToDeposit ? (isProcessing ? "Depositing your tokens" : "Deposit") :
-              (isProcessing ? "Approving your deposit" : "Approve")
+          }
+          {isDepositView ? (
+            approvedToDeposit ? (isConfirming ? "Depositing your tokens" : "Deposit") :
+              (isPending ? "Approving your deposit" : "Approve")
           ) : (
             isProcessing ? "Withdrawing your tokens" : "Withdraw"
           )}

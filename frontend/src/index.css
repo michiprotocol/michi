@@ -4,6 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --tw-blue: #8EE3FB;
+  --tw-blue-hover: #63D8FC;
+}
+
 body {
   font-family: "Anta", sans-serif;
 }
