@@ -48,7 +48,7 @@ export default function CreateNewWallet({
       abi,
       chainId: defaultChain.id,
       address: michiChestHelperAddress,
-      functionName: 'createChest',
+      functionName: 'createWallet',
       args: [
         1,
       ],

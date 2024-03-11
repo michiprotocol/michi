@@ -53,7 +53,7 @@ export default function MyWallets() {
   }
 
   const removeWallet = (tokenId: Wallet["tokenId"]) => {
-    setWallets(wallets.filter(wallet => wallet.tokenId !== tokenId))
+    setWallets(wallets.filter(wallet => wallet?.tokenId !== tokenId))
   }
 
   if (!account.isConnected) {
