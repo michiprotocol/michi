@@ -3,7 +3,7 @@ import { tokenABIs } from "@/constants/contracts/tokenABIs"
 import { DepositEventLog } from "@/constants/types/DepositEventLog"
 import { TransferLog } from "@/constants/types/TransferLog"
 import { DepositedToken, Token } from "@/constants/types/token"
-import { cn } from "@/lib/utils"
+import { cn, numOfConfirmationsToWaitFor } from "@/lib/utils"
 import TokenSelect from "@/shared/TokenSelect"
 import { useToast } from "@/shared/ui/use-toast"
 import { defaultChain, wagmiConfig } from "@/wagmi"
@@ -46,11 +46,13 @@ export default function WalletView(
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
+      confirmations: numOfConfirmationsToWaitFor
     })
 
     const { isLoading: isWithdrawalConfirming, isSuccess: isWithdrawalConfirmed } =
     useWaitForTransactionReceipt({
       hash: withdrawHash,
+      confirmations: numOfConfirmationsToWaitFor,
     })
 
   const { data: walletClient } = useWalletClient({

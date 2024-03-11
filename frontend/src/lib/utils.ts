@@ -2,6 +2,8 @@ import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Address } from "viem";
 
+export const numOfConfirmationsToWaitFor = 2;
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
