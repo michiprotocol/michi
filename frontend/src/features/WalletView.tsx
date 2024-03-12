@@ -146,6 +146,15 @@ export default function WalletView(
           michiChestHelperAddress,
           +(maxAmount || input) * (10 ** 18)
         ],
+      }).catch((e) => {
+        setIsProcessing(false);
+        // 4001 means user rejected the transaction
+        if (e.cause?.code !== 4001) {
+          toast({
+            title: "Error",
+            description: e.message,
+          })
+        }
       })
     }
   }
