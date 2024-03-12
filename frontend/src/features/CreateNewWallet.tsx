@@ -4,7 +4,7 @@ import { defaultChain } from "@/wagmi";
 import { useEffect } from "react";
 import { useToast } from "@/shared/ui/use-toast";
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
-import { decodeEthereumLog } from "@/lib/utils";
+import { decodeEthereumLog, numOfConfirmationsToWaitFor } from "@/lib/utils";
 
 export default function CreateNewWallet({
   addWallet
@@ -16,6 +16,7 @@ export default function CreateNewWallet({
   const { isLoading: isConfirming, isSuccess: isConfirmed, data } =
   useWaitForTransactionReceipt({
     hash,
+    confirmations: numOfConfirmationsToWaitFor,
   })
   const account = useAccount();
   const isLoading = isPending || isConfirming;
