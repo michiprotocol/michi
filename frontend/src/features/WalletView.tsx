@@ -1,7 +1,5 @@
 import { abi, michiChestHelperAddress } from "@/constants/contracts/MichiChest"
 import { tokenABIs } from "@/constants/contracts/tokenABIs"
-import { DepositEventLog } from "@/constants/types/DepositEventLog"
-import { TransferLog } from "@/constants/types/TransferLog"
 import { DepositedToken, Token } from "@/constants/types/token"
 import { cn, numOfConfirmationsToWaitFor } from "@/lib/utils"
 import TokenSelect from "@/shared/TokenSelect"
@@ -42,14 +40,20 @@ export default function WalletView(
   const tokenABI = useMemo(() => selectedToken && tokenABIs[selectedToken.token_address], [selectedToken])
   const account = useAccount();
   const { toast } = useToast();
-  const { writeContractAsync, isPending, data: hash } = useWriteContract()
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+  const { writeContractAsync, isPending, data: hash, error } = useWriteContract()
+  const { writeContractAsync: writeApprovalContractAsync, isPending: isApprovalPending, data: hashApproval } = useWriteContract()
+  const { isLoading: isDepositConfirming, isSuccess: isDepositConfirmed, } =
     useWaitForTransactionReceipt({
       hash,
       confirmations: numOfConfirmationsToWaitFor
-    })
+    });
+  const { isLoading: isApprovalConfirming, isSuccess: isApprovalConfirmed, } =
+    useWaitForTransactionReceipt({
+      hash: hashApproval,
+      confirmations: numOfConfirmationsToWaitFor
+    });
 
-    const { isLoading: isWithdrawalConfirming, isSuccess: isWithdrawalConfirmed } =
+  const { isLoading: isWithdrawalConfirming, isSuccess: isWithdrawalConfirmed } =
     useWaitForTransactionReceipt({
       hash: withdrawHash,
       confirmations: numOfConfirmationsToWaitFor,
@@ -92,22 +96,10 @@ export default function WalletView(
     () => selectedTokenAllowance && Number(formatEther(selectedTokenAllowance as BigNumberish)) >= Number(input),
     [selectedTokenAllowance, input]
   );
-
-  // token approval event listener
-  useWatchContractEvent({
-    config: wagmiConfig,
-    chainId: defaultChain.id,
-    address: selectedToken?.token_address,
-    eventName: "Approval",
-    abi: tokenABI,
-    onLogs() {
-      refetchSelectedTokenAllowance();
-      setIsProcessing(false);
-    },
-  })
+  const isLoading = isApprovalConfirming || isApprovalPending || isDepositConfirming || isPending;
 
   useEffect(() => {
-    if (isConfirmed) {
+    if (isDepositConfirmed) {
       toast({
         title: "Deposited successfully! 🎉",
         description: `${input} of ${selectedToken?.symbol} were deposited into your account`,
@@ -116,7 +108,21 @@ export default function WalletView(
       setIsProcessing(false);
       closeWalletView();
     }
-  }, [isConfirmed])
+  }, [isDepositConfirmed]);
+
+  useEffect(() => {
+    if (isApprovalConfirmed) {
+      refetchSelectedTokenAllowance();
+      setIsProcessing(false);
+
+      toast({
+        title: "Spending Cap Approved successfully! 🎉",
+        description: `${formatEther((selectedTokenAllowance ?? 0) as BigNumberish)} of ${selectedToken?.symbol} was approved for your account.  You can now deposit!`,
+      })
+
+      runDeposit();
+    }
+  }, [isApprovalConfirmed])
 
 
   useEffect(() => {
@@ -131,12 +137,12 @@ export default function WalletView(
     }
   }, [isWithdrawalConfirmed])
 
-  
+
 
   const handleApprove = async (token: Token) => {
     setIsProcessing(true);
     if (!approvedToDeposit) {
-      await writeContractAsync({
+      await writeApprovalContractAsync({
         account: account.address,
         abi: tokenABI!,
         chainId: defaultChain.id,
@@ -260,11 +266,11 @@ export default function WalletView(
             }
           }}
         >
-          {(isProcessing || isPending || isConfirming) &&
+          {(isProcessing || isLoading) &&
             <span className="loading loading-spinner" />
           }
           {isDepositView ? (
-            approvedToDeposit ? (isConfirming ? "Depositing your tokens" : "Deposit") :
+            approvedToDeposit ? (isDepositConfirming ? "Depositing your tokens" : "Deposit") :
               (isPending ? "Approving your deposit" : "Approve")
           ) : (
             isProcessing ? "Withdrawing your tokens" : "Withdraw"
