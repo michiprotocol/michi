@@ -16,7 +16,7 @@ export default function WalletWrapper({ address, name, index, children }: {
         <span>{name} #{index}</span>
         <div className="flex flex-row items-center gap-2">
           <span className="whitespace-nowrap">Linked Wallet:</span>
-          <a href={`${defaultChain.blockExplorers.default.url}/address/${address}`}>{formatCryptoAddress(address)}</a>
+          <a href={`${defaultChain.blockExplorers.default.url}/address/${address}`} target="_blank">{formatCryptoAddress(address)}</a>
         </div>
       </div>
       {children}

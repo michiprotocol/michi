@@ -49,7 +49,7 @@ export default function WalletView(
       confirmations: numOfConfirmationsToWaitFor
     })
 
-    const { isLoading: isWithdrawalConfirming, isSuccess: isWithdrawalConfirmed } =
+  const { isLoading: isWithdrawalConfirming, isSuccess: isWithdrawalConfirmed } =
     useWaitForTransactionReceipt({
       hash: withdrawHash,
       confirmations: numOfConfirmationsToWaitFor,
@@ -144,7 +144,7 @@ export default function WalletView(
         functionName: 'approve',
         args: [
           michiChestHelperAddress,
-          +(maxAmount || input) * (10 ** 18)
+          +input * (10 ** 18)
         ],
       })
     }
