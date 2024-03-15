@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/app(/.*)?",
+      "source": "/",
       "destination": "https://www.michiwallet.com/app"
     }
   ]
