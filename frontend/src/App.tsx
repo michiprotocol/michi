@@ -15,6 +15,10 @@ export default function App() {
       ),
       children: [
         {
+          path: Routes.ROOT,
+          element: <Navigate to={Routes.MY_WALLETS} replace />,
+        },
+        {
           path: Routes.MY_WALLETS,
           element: <MyWallets />,
         },
