@@ -1,5 +1,5 @@
 import { Routes } from "@/constants/routes";
-import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Navigate, Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
 import MyWallets from "@/pages/MyWallets";
 import Trade from "@/pages/Trade";
 import NavBar from "@/widgets/NavBar";
@@ -14,6 +14,10 @@ export default function App() {
         <Layout />
       ),
       children: [
+        {
+          path: Routes.ROOT,
+          element: <Navigate to={Routes.MY_WALLETS} replace />,
+        },
         {
           path: Routes.MY_WALLETS,
           element: <MyWallets />,
