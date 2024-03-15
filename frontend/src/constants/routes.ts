@@ -1,4 +1,4 @@
 export enum Routes {
-  MY_WALLETS = "/",
-  TRADE = "/trade",
+  MY_WALLETS = "/app",
+  TRADE = "/app/trade",
 }
