@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+
+.landing-page {
+  font-family: "Nunito Sans", sans-serif;
+  font-optical-sizing: auto;
+  background-image: url('/assets/landing/bg.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+.michi-gradient {
+  background: linear-gradient(90deg, #3360FF 0%, #20BDFF 100%);
+}
+
+.landing-hr {
+  background: linear-gradient(90deg, #3360FF 0%, #20BDFF 100%);
+  height: 1px;
+  width: 100%;
+}

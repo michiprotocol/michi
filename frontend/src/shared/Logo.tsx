@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export default function Logo() {
 
   return (
-    <Link to={Routes.MY_WALLETS}>
+    <Link to={Routes.ROOT}>
       <svg width="87" height="22" viewBox="0 0 87 22" fill="none" xmlns="http://www.w3.org/2000/svg">
         <mask id="mask0_103_751" style={{ maskType: "luminance" }} maskUnits="userSpaceOnUse" x="0" y="0" width="22" height="22">
           <path d="M21.6046 0H0V21.25H21.6046V0Z" fill="white" />

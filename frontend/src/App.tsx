@@ -1,11 +1,12 @@
 import { Routes } from "@/constants/routes";
-import { Navigate, Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
 import MyWallets from "@/pages/MyWallets";
 import Trade from "@/pages/Trade";
 import NavBar from "@/widgets/NavBar";
-import { Toaster } from "./shared/ui/toaster";
+import { Outlet, RouterProvider, createBrowserRouter, useLocation } from "react-router-dom";
 import { useAccount } from "wagmi";
+import Landing from "./pages/Landing";
 import NotConnected from "./shared/NotConnected";
+import { Toaster } from "./shared/ui/toaster";
 
 export default function App() {
   const router = createBrowserRouter([
@@ -16,7 +17,7 @@ export default function App() {
       children: [
         {
           path: Routes.ROOT,
-          element: <Navigate to={Routes.MY_WALLETS} replace />,
+          element: <Landing />,
         },
         {
           path: Routes.MY_WALLETS,
@@ -37,6 +38,13 @@ export default function App() {
 
 function Layout() {
   const { isConnected } = useAccount();
+  const location = useLocation();
+  const currentRoute = location.pathname;
+  if (currentRoute === Routes.ROOT) {
+    return (
+      <Landing />
+    )
+  }
   return (
     <div className="min-h-screen w-full bg-background text-info overflow-x-hidden">
       <NavBar />

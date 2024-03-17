@@ -22,15 +22,18 @@ module.exports = {
         dark: "#2D2D37",
         success: "#27d564",
       },
+      stroke: {
+        "trading-protocol": "linear-gradient(90deg, #3360FF 0%, #20BDFF 100%)",
+      },
     },
   },
   plugins: [
     require("daisyui"),
     function ({ addUtilities }) {
       const newUtilities = {
-        '.custom-drop-shadow': {
-          filter: 'drop-shadow(rgb(53, 205, 248) 0px 0px 8px)',
-        }
+        ".custom-drop-shadow": {
+          filter: "drop-shadow(rgb(53, 205, 248) 0px 0px 8px)",
+        },
       };
       addUtilities(newUtilities, ["responsive", "hover"]);
     },
